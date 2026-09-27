@@ -276,6 +276,46 @@ def era5_850_daily():
             "on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate")
 
 
+NE_URL = "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip"
+
+
+def boundary():
+    """India land mask from Natural Earth 1:50m admin-0 (public domain), rasterised to G12/G5.
+    Natural Earth draws de facto boundaries; they are used only as an approximate IMD warning
+    domain for the tracker, not as an official boundary."""
+    import io
+    import zipfile
+    import shapefile
+    from matplotlib.path import Path as MPath
+    from synth.grids import LAT12, LON12, LAT5, LON5
+    d = REAL / "boundary"
+    d.mkdir(parents=True, exist_ok=True)
+    r = requests.get(NE_URL, timeout=120)
+    r.raise_for_status()
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    base = "ne_50m_admin_0_countries"
+    sf = shapefile.Reader(shp=io.BytesIO(z.read(f"{base}.shp")), dbf=io.BytesIO(z.read(f"{base}.dbf")),
+                          shx=io.BytesIO(z.read(f"{base}.shx")))
+    names = [f[0] for f in sf.fields[1:]]
+    iso = names.index("ADM0_A3")
+    shp = next(s for s, rec in zip(sf.shapes(), sf.records()) if rec[iso] == "IND")
+    parts = list(shp.parts) + [len(shp.points)]
+    for name, la, lo in (("g12", LAT12, LON12), ("g5", LAT5, LON5)):
+        LO, LA = np.meshgrid(lo, la)
+        pts = np.column_stack([LO.ravel(), LA.ravel()])
+        m = np.zeros(len(pts), bool)
+        for a, b in zip(parts[:-1], parts[1:]):          # each ring: even-odd fill
+            m ^= MPath(np.array(shp.points[a:b])).contains_points(pts)
+        mask = m.reshape(LA.shape).astype(np.uint8)
+        xr.Dataset({"india": (("latitude", "longitude"), mask,
+                              {"long_name": "India (Natural Earth 1:50m admin-0, de facto)"})},
+                   coords={"latitude": la, "longitude": lo},
+                   attrs={"synthetic": "false", "source": NE_URL, "grid": name}
+                   ).to_netcdf(d / f"india_mask_{name}.nc")
+    log("Natural Earth 1:50m admin-0 (India mask)", NE_URL, "OK", dir_mb(d), "static",
+        "rasterised to G12/G5 (cell centres inside the IND polygon); approximate IMD domain")
+
+
 # ----------------------------------------------------------------------------- climatology
 WINDOWS = {"amphan": ("2020-05-10", "2020-05-25"), "coldwave": ("2022-12-20", "2023-01-20"),
            "heatwave": ("2024-05-15", "2024-06-20")}
@@ -497,7 +537,7 @@ def keyed():
             log(src, url, "SKIPPED", note="key present but downloader not implemented in this phase")
 
 
-STEPS = {"era5": era5, "rh850": rh850, "era5_850_daily": era5_850_daily, "repack": repack, "clim": clim, "ibtracs": ibtracs, "dem": dem, "imd": imd, "keyed": keyed}
+STEPS = {"boundary": boundary, "era5": era5, "rh850": rh850, "era5_850_daily": era5_850_daily, "repack": repack, "clim": clim, "ibtracs": ibtracs, "dem": dem, "imd": imd, "keyed": keyed}
 
 if __name__ == "__main__":
     REAL.mkdir(parents=True, exist_ok=True)

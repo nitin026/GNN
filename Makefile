@@ -3,15 +3,15 @@
 PY ?= .venv/Scripts/python
 export PYTHONIOENCODING=utf-8
 
-.PHONY: all research data-real data-synth validate baseline improvements test verify
+.PHONY: all research data-real data-synth validate baseline improvements gnn test verify
 
-all: research data-real data-synth validate baseline improvements test verify
+all: research data-real data-synth validate baseline improvements gnn test verify
 
 research:
 	$(PY) scripts/check_links.py --prune
 
 data-real:
-	$(PY) scripts/fetch_real.py era5 rh850 era5_850_daily clim ibtracs dem imd keyed repack
+	$(PY) scripts/fetch_real.py boundary era5 rh850 era5_850_daily clim ibtracs dem imd keyed repack
 	$(PY) scripts/write_sources.py
 
 data-synth:
@@ -26,6 +26,14 @@ baseline:
 improvements:
 	$(PY) -m pipeline.tune_tracker2
 	$(PY) -m pipeline.phase1_report
+
+gnn:
+	$(PY) -m pipeline.graphs
+	$(PY) scripts/train_tracker.py --variant full
+	$(PY) scripts/train_tracker.py --variant temporal
+	$(PY) scripts/train_tracker.py --variant cross
+	$(PY) scripts/train_tracker.py --variant none
+	$(PY) -m pipeline.gnn_eval
 
 test:
 	$(PY) -m pytest -q

@@ -1,0 +1,27 @@
+{
+ "variant": "full",
+ "hidden": 64,
+ "epochs": 150,
+ "lr": 0.001,
+ "seed": 0,
+ "best_epoch": 149,
+ "best_val_ap_sum": 1.9481171184335957,
+ "train_cases": [
+  "cyc_01",
+  "cyc_02",
+  "heat_01",
+  "heat_02",
+  "cold_01",
+  "cold_02"
+ ],
+ "val_cases": [
+  "cyc_03",
+  "heat_03",
+  "cold_03"
+ ],
+ "n_node_features": 18,
+ "n_edge_features": 6,
+ "train_seconds": 417.4615640640259,
+ "compute": "torch 2.14.0+cpu on cpu (10 threads)",
+ "synthetic_training_data": "true"
+}

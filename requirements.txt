@@ -98,3 +98,4 @@ xarray==2026.7.0
 xxhash==4.0.1
 yarl==1.25.1
 zarr==3.4.0
+pyshp==2.3.1

@@ -178,5 +178,14 @@
   "time_range": "2024-05-15 .. 2024-06-20 daily 12 UTC",
   "note": "37 steps; 2800s; direct HTTPS chunk reads (fsspec timed out on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate",
   "logged_at": "2026-09-27T15:38:10+00:00"
+ },
+ {
+  "source": "Natural Earth 1:50m admin-0 (India mask)",
+  "url": "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip",
+  "status": "OK",
+  "size_mb": 1.1,
+  "time_range": "static",
+  "note": "rasterised to G12/G5 (cell centres inside the IND polygon); approximate IMD domain",
+  "logged_at": "2026-09-27T15:50:23+00:00"
  }
 ]

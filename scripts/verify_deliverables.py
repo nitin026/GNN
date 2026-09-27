@@ -128,6 +128,20 @@ for name, pat in (("conservation avgpool", r"def test_case_files_conserve"),
                   ("tracker IoU on synthetic case", r"def test_tracker_iou_on_synthetic_case")):
     check(re.search(pat, tests) is not None, f"test present: {name}")
 
+# --------------------------------------------------------------------------- BRIEF2
+section("BRIEF2")
+for pth in ("docs/COMPUTE.md", "notebooks/train_colab.ipynb", "scripts/package_training_data.py",
+            "reports/IMPROVEMENTS.md", "pipeline/tracker2.py", "reports/GNN_RESULTS.md",
+            "pipeline/gnn.py", "scripts/train_tracker.py"):
+    check((ROOT / pth).exists(), f"{pth} exists")
+if (ROOT / "reports/GNN_RESULTS.md").exists():
+    t = (ROOT / "reports/GNN_RESULTS.md").read_text(encoding="utf-8")
+    figs = re.findall(r"\]\((figures/[^)]+\.png)\)", t)
+    check(figs and all((ROOT / "reports" / f).exists() for f in figs),
+          f"GNN_RESULTS.md: {len(figs)} figures referenced and present")
+    for v in ("full", "temporal", "cross", "none"):
+        check((ROOT / "models/tracker" / v / "config.json").exists(), f"GNN variant '{v}' trained")
+
 # --------------------------------------------------------------------------- constraints
 section("Constraints")
 size = sum(p.stat().st_size for p in (ROOT / "data").rglob("*") if p.is_file()) / 1e9
@@ -147,6 +161,9 @@ try:
                          check=True).stdout
     for ph in range(1, 6):
         check(re.search(rf"^Phase {ph}\b", log, flags=re.M) is not None, f"git commit for Phase {ph}")
+    for ph in range(0, 2):
+        check(re.search(rf"^BRIEF2 Phase {ph}\b", log, flags=re.M) is not None,
+              f"git commit for BRIEF2 Phase {ph}")
 except (subprocess.CalledProcessError, FileNotFoundError) as e:
     check(False, f"git available ({e})")
 check((ROOT / "SUMMARY.md").exists(), "SUMMARY.md exists")
