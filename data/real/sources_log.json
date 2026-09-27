@@ -1,0 +1,164 @@
+[
+ {
+  "source": "IBTrACS v04r01 North Indian",
+  "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NI.list.v04r01.csv",
+  "status": "OK",
+  "size_mb": 28.8,
+  "time_range": "Amphan 2020-05-15 06:00:00 .. 2020-05-21 12:00:00",
+  "note": "51 Amphan fixes; 337 NI storms 1990-2023 kept for track sampling",
+  "logged_at": "2026-09-27T11:46:20+00:00"
+ },
+ {
+  "source": "TIGGE NEPS-G (origin dems)",
+  "url": "https://apps.ecmwf.int/datasets/data/tigge",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "SKIPPED - no key (ECMWF_API_KEY not in .env)",
+  "logged_at": "2026-09-27T11:46:20+00:00"
+ },
+ {
+  "source": "GPM IMERG daily 0.1 deg",
+  "url": "https://gpm.nasa.gov/data/imerg",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "SKIPPED - no key (EARTHDATA_TOKEN not in .env)",
+  "logged_at": "2026-09-27T11:46:20+00:00"
+ },
+ {
+  "source": "CDS ERA5-Land",
+  "url": "https://cds.climate.copernicus.eu",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "SKIPPED - no key (CDSAPI_KEY not in .env)",
+  "logged_at": "2026-09-27T11:46:20+00:00"
+ },
+ {
+  "source": "ERA5 WB2 (path from brief)",
+  "url": "gs://weatherbench2/datasets/era5/1959-2023_01_10-6h-1440x721_with_derived_variables.zarr",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "HTTP 404 on .zmetadata: store name lacks 'wb13-'. Used gs://weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr instead (same product, 13 levels).",
+  "logged_at": "2026-09-27T11:46:59+00:00"
+ },
+ {
+  "source": "ERA5 WB2 via gcsfs token=anon",
+  "url": "gs://weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "xr.open_zarr via gcsfs hung >180 s on Windows in 2 attempts; switched to the same public bucket over plain HTTPS (storage.googleapis.com) with fsspec.",
+  "logged_at": "2026-09-27T11:46:59+00:00"
+ },
+ {
+  "source": "IMD 0.25 rainfall 2020",
+  "url": "https://imdpune.gov.in (via imdlib)",
+  "status": "OK",
+  "size_mb": 26.9,
+  "time_range": "2020-01-01 .. 2020-12-31 daily",
+  "note": "native 0.25 + G12 (bilinear; G5 not written)",
+  "logged_at": "2026-09-27T11:50:02+00:00"
+ },
+ {
+  "source": "IMD 0.25 rainfall 2024",
+  "url": "https://imdpune.gov.in (via imdlib)",
+  "status": "OK",
+  "size_mb": 25.3,
+  "time_range": "2024-01-01 .. 2024-12-31 daily",
+  "note": "native 0.25 + G12 (bilinear; G5 not written)",
+  "logged_at": "2026-09-27T11:50:09+00:00"
+ },
+ {
+  "source": "dem",
+  "url": "",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ValueError: cannot reshape array of size 1000000 into shape (333,3,333,3)",
+  "logged_at": "2026-09-27T11:53:19+00:00"
+ },
+ {
+  "source": "ERA5 amphan",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 1359.0,
+  "time_range": "2020-05-10T00 .. 2020-05-25T18 (6-hourly)",
+  "note": "vars ['msl', 'q850', 't2m', 'tp', 'u10', 'u850', 'v10', 'v850']; 64 steps; 993s; files ['amphan_era5_0p25.nc', 'amphan_era5_g12.nc', 'amphan_era5_g5.nc']",
+  "logged_at": "2026-09-27T12:03:32+00:00"
+ },
+ {
+  "source": "Copernicus DEM GLO-90",
+  "url": "https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com (s3://copernicus-dem-90m)",
+  "status": "OK",
+  "size_mb": 65.9,
+  "time_range": "static",
+  "note": "979 land tiles read via COG overviews at 0.01 deg; 0 tile reads failed (set to 0 m); block-averaged to G5 and G12",
+  "logged_at": "2026-09-27T12:05:41+00:00"
+ },
+ {
+  "source": "ERA5 coldwave",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 1471.0,
+  "time_range": "2022-12-20T00 .. 2023-01-20T18 (6-hourly)",
+  "note": "vars ['msl', 't2m', 'tp', 'u10', 'v10']; 128 steps; 458s; files ['coldwave_era5_0p25.nc', 'coldwave_era5_g12.nc', 'coldwave_era5_g5.nc']",
+  "logged_at": "2026-09-27T12:11:10+00:00"
+ },
+ {
+  "source": "ERA5 heatwave",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 1834.0,
+  "time_range": "2024-05-15T00 .. 2024-06-20T18 (6-hourly)",
+  "note": "vars ['msl', 't2m', 'tp', 'u10', 'v10']; 148 steps; 788s; files ['heatwave_era5_0p25.nc', 'heatwave_era5_g12.nc', 'heatwave_era5_g5.nc']",
+  "logged_at": "2026-09-27T12:24:48+00:00"
+ },
+ {
+  "source": "ERA5 coldwave 850 hPa q/u/v",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ARCO 3-D chunks hold all 37 levels of the full globe (~100 MB per step); skipped to stay within the bandwidth/time budget. Surface fields only.",
+  "logged_at": "2026-09-27T12:25:26+00:00"
+ },
+ {
+  "source": "ERA5 heatwave 850 hPa q/u/v",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ARCO 3-D chunks hold all 37 levels of the full globe (~100 MB per step); skipped to stay within the bandwidth/time budget. Surface fields only.",
+  "logged_at": "2026-09-27T12:25:26+00:00"
+ },
+ {
+  "source": "ERA5 amphan 850 hPa relative humidity",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": null,
+  "time_range": "2020-05-10T00 .. 2020-05-25T18 (6-hourly)",
+  "note": "r850 added to amphan files; 604s",
+  "logged_at": "2026-09-27T12:35:58+00:00"
+ },
+ {
+  "source": "ERA5 climatology (mean)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_1440x721.zarr",
+  "status": "OK",
+  "size_mb": 694.1,
+  "time_range": "1990-2019, day-of-year 94 days",
+  "note": "1559s; vars t2m,msl,tp mean",
+  "logged_at": "2026-09-27T12:40:39+00:00"
+ },
+ {
+  "source": "ERA5 climatology (std)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-6h-240x121_equiangular_with_poles_conservative.zarr",
+  "status": "OK",
+  "size_mb": null,
+  "time_range": "1990-2019",
+  "note": "std per hour/doy from 1.5 deg ERA5 with a +-15-day window; interpolated to 0.25/G12. G5 climatology not written (anomalies are computed at 12 km).",
+  "logged_at": "2026-09-27T12:40:39+00:00"
+ }
+]

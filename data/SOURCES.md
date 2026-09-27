@@ -1,0 +1,28 @@
+# Data sources
+
+Every real-data source attempted by `scripts/fetch_real.py` is listed here with its status (OK / FAILED / SKIPPED). Generated from `data/real/sources_log.json` by `scripts/write_sources.py`. Sizes are on-disk sizes of the files written (MB).
+
+| source | url | status | size (MB) | time range | note | logged (UTC) |
+|---|---|---|---|---|---|---|
+| IBTrACS v04r01 North Indian | https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NI.list.v04r01.csv | OK | 28.8 | Amphan 2020-05-15 06:00:00 .. 2020-05-21 12:00:00 | 51 Amphan fixes; 337 NI storms 1990-2023 kept for track sampling | 2026-09-27T11:46:20+00:00 |
+| TIGGE NEPS-G (origin dems) | https://apps.ecmwf.int/datasets/data/tigge | SKIPPED |  |  | SKIPPED - no key (ECMWF_API_KEY not in .env) | 2026-09-27T11:46:20+00:00 |
+| GPM IMERG daily 0.1 deg | https://gpm.nasa.gov/data/imerg | SKIPPED |  |  | SKIPPED - no key (EARTHDATA_TOKEN not in .env) | 2026-09-27T11:46:20+00:00 |
+| CDS ERA5-Land | https://cds.climate.copernicus.eu | SKIPPED |  |  | SKIPPED - no key (CDSAPI_KEY not in .env) | 2026-09-27T11:46:20+00:00 |
+| ERA5 WB2 (path from brief) | gs://weatherbench2/datasets/era5/1959-2023_01_10-6h-1440x721_with_derived_variables.zarr | FAILED |  |  | HTTP 404 on .zmetadata: store name lacks 'wb13-'. Used gs://weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr instead (same product, 13 levels). | 2026-09-27T11:46:59+00:00 |
+| ERA5 WB2 via gcsfs token=anon | gs://weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr | FAILED |  |  | xr.open_zarr via gcsfs hung >180 s on Windows in 2 attempts; switched to the same public bucket over plain HTTPS (storage.googleapis.com) with fsspec. | 2026-09-27T11:46:59+00:00 |
+| IMD 0.25 rainfall 2020 | https://imdpune.gov.in (via imdlib) | OK | 26.9 | 2020-01-01 .. 2020-12-31 daily | native 0.25 + G12 (bilinear; G5 not written) | 2026-09-27T11:50:02+00:00 |
+| IMD 0.25 rainfall 2024 | https://imdpune.gov.in (via imdlib) | OK | 25.3 | 2024-01-01 .. 2024-12-31 daily | native 0.25 + G12 (bilinear; G5 not written) | 2026-09-27T11:50:09+00:00 |
+| dem |  | FAILED |  |  | ValueError: cannot reshape array of size 1000000 into shape (333,3,333,3) | 2026-09-27T11:53:19+00:00 |
+| ERA5 amphan | https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr | OK | 1359.0 | 2020-05-10T00 .. 2020-05-25T18 (6-hourly) | vars ['msl', 'q850', 't2m', 'tp', 'u10', 'u850', 'v10', 'v850']; 64 steps; 993s; files ['amphan_era5_0p25.nc', 'amphan_era5_g12.nc', 'amphan_era5_g5.nc'] | 2026-09-27T12:03:32+00:00 |
+| Copernicus DEM GLO-90 | https://copernicus-dem-90m.s3.eu-central-1.amazonaws.com (s3://copernicus-dem-90m) | OK | 65.9 | static | 979 land tiles read via COG overviews at 0.01 deg; 0 tile reads failed (set to 0 m); block-averaged to G5 and G12 | 2026-09-27T12:05:41+00:00 |
+| ERA5 coldwave | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | OK | 1471.0 | 2022-12-20T00 .. 2023-01-20T18 (6-hourly) | vars ['msl', 't2m', 'tp', 'u10', 'v10']; 128 steps; 458s; files ['coldwave_era5_0p25.nc', 'coldwave_era5_g12.nc', 'coldwave_era5_g5.nc'] | 2026-09-27T12:11:10+00:00 |
+| ERA5 heatwave | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | OK | 1834.0 | 2024-05-15T00 .. 2024-06-20T18 (6-hourly) | vars ['msl', 't2m', 'tp', 'u10', 'v10']; 148 steps; 788s; files ['heatwave_era5_0p25.nc', 'heatwave_era5_g12.nc', 'heatwave_era5_g5.nc'] | 2026-09-27T12:24:48+00:00 |
+| ERA5 coldwave 850 hPa q/u/v | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | SKIPPED |  |  | ARCO 3-D chunks hold all 37 levels of the full globe (~100 MB per step); skipped to stay within the bandwidth/time budget. Surface fields only. | 2026-09-27T12:25:26+00:00 |
+| ERA5 heatwave 850 hPa q/u/v | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | SKIPPED |  |  | ARCO 3-D chunks hold all 37 levels of the full globe (~100 MB per step); skipped to stay within the bandwidth/time budget. Surface fields only. | 2026-09-27T12:25:26+00:00 |
+| ERA5 amphan 850 hPa relative humidity | https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr | OK |  | 2020-05-10T00 .. 2020-05-25T18 (6-hourly) | r850 added to amphan files; 604s | 2026-09-27T12:35:58+00:00 |
+| ERA5 climatology (mean) | https://storage.googleapis.com/weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_1440x721.zarr | OK | 694.1 | 1990-2019, day-of-year 94 days | 1559s; vars t2m,msl,tp mean | 2026-09-27T12:40:39+00:00 |
+| ERA5 climatology (std) | https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-6h-240x121_equiangular_with_poles_conservative.zarr | OK |  | 1990-2019 | std per hour/doy from 1.5 deg ERA5 with a +-15-day window; interpolated to 0.25/G12. G5 climatology not written (anomalies are computed at 12 km). | 2026-09-27T12:40:39+00:00 |
+
+## Synthetic data
+
+All synthetic data lives under `data/synthetic/` and every file carries the global attribute `synthetic = "true"`. Synthetic cases use the real ERA5 backgrounds listed above (with extremes soft-clipped), the real Copernicus DEM and real IBTrACS tracks. The analytic synthetic-climatology fallback in `synth/background.py` was **not** needed, because the ERA5 downloads succeeded. If it is ever used, the files record `background = synthetic_climatology`.

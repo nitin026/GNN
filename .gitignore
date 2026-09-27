@@ -10,3 +10,7 @@ data/real/**/*.zarr
 data/real/**/*.tif
 data/real/raw/
 data/synthetic/**/*.nc
+data/real/*.log
+data/real/imd/raw/
+data/real/dem/raw/
+data/real/ibtracs/ibtracs.NI.list.v04r01.csv
