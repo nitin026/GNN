@@ -142,6 +142,25 @@ if (ROOT / "reports/GNN_RESULTS.md").exists():
     for v in ("full", "temporal", "cross", "none"):
         check((ROOT / "models/tracker" / v / "config.json").exists(), f"GNN variant '{v}' trained")
 
+# --------------------------------------------------------------------------- BRIEF4
+section("BRIEF4")
+check((ROOT / "reports/TUNING_LOG.md").exists(), "reports/TUNING_LOG.md exists")
+dsr = ROOT / "reports/DOWNSCALE_RESULTS.md"
+check(dsr.exists(), "reports/DOWNSCALE_RESULTS.md exists (Phase 0)")
+if dsr.exists():
+    t = dsr.read_text(encoding="utf-8")
+    figs = re.findall(r"\]\((figures/[^)]+\.png)\)", t)
+    check(len(figs) >= 3 and all((ROOT / "reports" / f).exists() for f in figs),
+          f"DOWNSCALE_RESULTS.md: {len(figs)} figures present")
+    check("## What did not work" in t, "DOWNSCALE_RESULTS.md has a 'What did not work' section")
+    js = json.loads((ROOT / "reports/downscaling_results.json").read_text())
+    check(set(js["metrics"]) >= {"bicubic+lapse", "unet", "diffusion_mean", "diffusion_sample"},
+          "downscaling metrics for all 4 models")
+    check(js["n_samples"] >= 8 and "crps" in js["metrics"]["diffusion_mean"]["tp"],
+          "diffusion CRPS with >= 8 samples")
+    check(js["peak_rss_mb"] > 0, f"peak RSS recorded ({js['peak_rss_mb']:.0f} MB)")
+    check("imd_perfect_model" in js, "IMD perfect-model real-data check present")
+
 # --------------------------------------------------------------------------- constraints
 section("Constraints")
 size = sum(p.stat().st_size for p in (ROOT / "data").rglob("*") if p.is_file()) / 1e9
