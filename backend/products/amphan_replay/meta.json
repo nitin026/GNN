@@ -1,0 +1,492 @@
+{
+ "case": "amphan_replay",
+ "hazard": "tropical_cyclone",
+ "synthetic": true,
+ "badge": "SYNTHETIC",
+ "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))",
+ "init_time": "2020-05-15 06:00:00",
+ "valid_times": [
+  "2020-05-15 06:00:00",
+  "2020-05-15 12:00:00",
+  "2020-05-15 18:00:00",
+  "2020-05-16 00:00:00",
+  "2020-05-16 06:00:00",
+  "2020-05-16 12:00:00",
+  "2020-05-16 18:00:00",
+  "2020-05-17 00:00:00",
+  "2020-05-17 06:00:00",
+  "2020-05-17 12:00:00",
+  "2020-05-17 18:00:00",
+  "2020-05-18 00:00:00",
+  "2020-05-18 06:00:00",
+  "2020-05-18 12:00:00",
+  "2020-05-18 18:00:00",
+  "2020-05-19 00:00:00",
+  "2020-05-19 06:00:00",
+  "2020-05-19 12:00:00",
+  "2020-05-19 18:00:00",
+  "2020-05-20 00:00:00",
+  "2020-05-20 06:00:00",
+  "2020-05-20 12:00:00",
+  "2020-05-20 18:00:00",
+  "2020-05-21 00:00:00",
+  "2020-05-21 06:00:00",
+  "2020-05-21 12:00:00",
+  "2020-05-21 18:00:00",
+  "2020-05-22 00:00:00",
+  "2020-05-22 06:00:00",
+  "2020-05-22 12:00:00",
+  "2020-05-22 18:00:00",
+  "2020-05-23 00:00:00",
+  "2020-05-23 06:00:00",
+  "2020-05-23 12:00:00",
+  "2020-05-23 18:00:00",
+  "2020-05-24 00:00:00",
+  "2020-05-24 06:00:00",
+  "2020-05-24 12:00:00",
+  "2020-05-24 18:00:00",
+  "2020-05-25 00:00:00",
+  "2020-05-25 06:00:00"
+ ],
+ "leads_h": [
+  0,
+  6,
+  12,
+  18,
+  24,
+  30,
+  36,
+  42,
+  48,
+  54,
+  60,
+  66,
+  72,
+  78,
+  84,
+  90,
+  96,
+  102,
+  108,
+  114,
+  120,
+  126,
+  132,
+  138,
+  144,
+  150,
+  156,
+  162,
+  168,
+  174,
+  180,
+  186,
+  192,
+  198,
+  204,
+  210,
+  216,
+  222,
+  228,
+  234,
+  240
+ ],
+ "n_members": 20,
+ "bounds": [
+  60.0,
+  0.0,
+  99.96,
+  39.96
+ ],
+ "grid_12km": "G12 0.12 deg 333x333",
+ "grid_5km": "G5 0.04 deg 999x999",
+ "leads_5km_h": [
+  0,
+  12,
+  24,
+  36,
+  48,
+  60,
+  72,
+  84,
+  96,
+  108,
+  120,
+  132,
+  144,
+  156,
+  168,
+  180,
+  192,
+  204,
+  216,
+  228,
+  240
+ ],
+ "fields_member": "member 0",
+ "downscaler": "U-Net + exact conservation projection (models/downscale/unet)",
+ "tracker": "GNN full (models/tracker/full), decode {'tau_n': 0.5, 'tau_e': 0.5, 'min_len': 2}",
+ "legends": {
+  "t2m": {
+   "cmap": "RdBu_r",
+   "vmin": -10.0,
+   "vmax": 48.0,
+   "units": "degC",
+   "transparent_below": null,
+   "stops": [
+    {
+     "value": -10.0,
+     "color": "#053061"
+    },
+    {
+     "value": -2.75,
+     "color": "#2a71b2"
+    },
+    {
+     "value": 4.5,
+     "color": "#6bacd1"
+    },
+    {
+     "value": 11.75,
+     "color": "#c2ddec"
+    },
+    {
+     "value": 19.0,
+     "color": "#f7f6f6"
+    },
+    {
+     "value": 26.25,
+     "color": "#fbccb4"
+    },
+    {
+     "value": 33.5,
+     "color": "#e48066"
+    },
+    {
+     "value": 40.75,
+     "color": "#ba2832"
+    },
+    {
+     "value": 48.0,
+     "color": "#67001f"
+    }
+   ]
+  },
+  "wind": {
+   "cmap": "magma",
+   "vmin": 0.0,
+   "vmax": 60.0,
+   "units": "m/s",
+   "transparent_below": null,
+   "stops": [
+    {
+     "value": 0.0,
+     "color": "#000004"
+    },
+    {
+     "value": 7.5,
+     "color": "#1d1147"
+    },
+    {
+     "value": 15.0,
+     "color": "#51127c"
+    },
+    {
+     "value": 22.5,
+     "color": "#832681"
+    },
+    {
+     "value": 30.0,
+     "color": "#b73779"
+    },
+    {
+     "value": 37.5,
+     "color": "#e75263"
+    },
+    {
+     "value": 45.0,
+     "color": "#fc8961"
+    },
+    {
+     "value": 52.5,
+     "color": "#fec488"
+    },
+    {
+     "value": 60.0,
+     "color": "#fcfdbf"
+    }
+   ]
+  },
+  "msl": {
+   "cmap": "cividis",
+   "vmin": 960.0,
+   "vmax": 1030.0,
+   "units": "hPa",
+   "transparent_below": null,
+   "stops": [
+    {
+     "value": 960.0,
+     "color": "#00224e"
+    },
+    {
+     "value": 968.75,
+     "color": "#1a386f"
+    },
+    {
+     "value": 977.5,
+     "color": "#434e6c"
+    },
+    {
+     "value": 986.25,
+     "color": "#61656f"
+    },
+    {
+     "value": 995.0,
+     "color": "#7d7c78"
+    },
+    {
+     "value": 1003.75,
+     "color": "#9b9476"
+    },
+    {
+     "value": 1012.5,
+     "color": "#bcae6c"
+    },
+    {
+     "value": 1021.25,
+     "color": "#dec958"
+    },
+    {
+     "value": 1030.0,
+     "color": "#fee838"
+    }
+   ]
+  },
+  "tp": {
+   "cmap": "viridis",
+   "vmin": 0.0,
+   "vmax": 60.0,
+   "units": "mm/6h",
+   "transparent_below": 0.2,
+   "stops": [
+    {
+     "value": 0.0,
+     "color": "#440154"
+    },
+    {
+     "value": 7.5,
+     "color": "#472d7b"
+    },
+    {
+     "value": 15.0,
+     "color": "#3b528b"
+    },
+    {
+     "value": 22.5,
+     "color": "#2c728e"
+    },
+    {
+     "value": 30.0,
+     "color": "#21918c"
+    },
+    {
+     "value": 37.5,
+     "color": "#28ae80"
+    },
+    {
+     "value": 45.0,
+     "color": "#5ec962"
+    },
+    {
+     "value": 52.5,
+     "color": "#addc30"
+    },
+    {
+     "value": 60.0,
+     "color": "#fde725"
+    }
+   ]
+  },
+  "anom": {
+   "cmap": "RdBu_r",
+   "vmin": -4.0,
+   "vmax": 4.0,
+   "units": "z-score (sigma)",
+   "transparent_below": null,
+   "stops": [
+    {
+     "value": -4.0,
+     "color": "#053061"
+    },
+    {
+     "value": -3.0,
+     "color": "#2a71b2"
+    },
+    {
+     "value": -2.0,
+     "color": "#6bacd1"
+    },
+    {
+     "value": -1.0,
+     "color": "#c2ddec"
+    },
+    {
+     "value": 0.0,
+     "color": "#f7f6f6"
+    },
+    {
+     "value": 1.0,
+     "color": "#fbccb4"
+    },
+    {
+     "value": 2.0,
+     "color": "#e48066"
+    },
+    {
+     "value": 3.0,
+     "color": "#ba2832"
+    },
+    {
+     "value": 4.0,
+     "color": "#67001f"
+    }
+   ]
+  },
+  "strike": {
+   "cmap": "inferno",
+   "vmin": 0.0,
+   "vmax": 1.0,
+   "units": "probability",
+   "transparent_below": 0.02,
+   "stops": [
+    {
+     "value": 0.0,
+     "color": "#000004"
+    },
+    {
+     "value": 0.125,
+     "color": "#210c4a"
+    },
+    {
+     "value": 0.25,
+     "color": "#57106e"
+    },
+    {
+     "value": 0.375,
+     "color": "#8a226a"
+    },
+    {
+     "value": 0.5,
+     "color": "#bc3754"
+    },
+    {
+     "value": 0.625,
+     "color": "#e45a31"
+    },
+    {
+     "value": 0.75,
+     "color": "#f98e09"
+    },
+    {
+     "value": 0.875,
+     "color": "#f9cb35"
+    },
+    {
+     "value": 1.0,
+     "color": "#fcffa4"
+    }
+   ]
+  }
+ },
+ "bbox4d": [
+  {
+   "lat_min": 7.800000000000001,
+   "lat_max": 22.439999999999998,
+   "lon_min": 82.8,
+   "lon_max": 91.32000000000001,
+   "level_hPa_bottom": 1013,
+   "level_hPa_top": 850,
+   "t_start": "2020-05-15 12:00:00",
+   "t_end": "2020-05-19 18:00:00",
+   "lead_start_h": 6,
+   "lead_end_h": 108,
+   "member_count_min": 12,
+   "n_members": 20,
+   "hazard": "tropical_cyclone",
+   "source": "GNN consensus"
+  }
+ ],
+ "label_bbox4d": {
+  "lat_min": 7.6,
+  "lat_max": 26.2,
+  "lon_min": 82.88,
+  "lon_max": 91.0,
+  "level_hPa_bottom": 1013,
+  "level_hPa_top": 850,
+  "time_start": "2020-05-15T12:00:00",
+  "time_end": "2020-05-21T06:00:00",
+  "lead_start_h": 6,
+  "lead_end_h": 144
+ },
+ "metrics": {
+  "tracking": {
+   "v2": {
+    "iou": 0.33722705897068217,
+    "csi": 0.6660869565217391,
+    "pod": 0.7979166666666667,
+    "far": 0.19874476987447698,
+    "spurious_tracks": 3,
+    "centroid_err_km": 7.5244037649336875,
+    "detect_lag_h": 0
+   },
+   "te_style": {
+    "iou": 0.0,
+    "csi": 0.07814674885663153,
+    "pod": 0.81875,
+    "far": 0.9204775394577094,
+    "spurious_tracks": 309,
+    "centroid_err_km": 2533.675338536431,
+    "detect_lag_h": 0
+   },
+   "gnn_full": {
+    "iou": 0.02507549998079588,
+    "csi": 0.7269372693726938,
+    "pod": 0.8208333333333333,
+    "far": 0.13596491228070176,
+    "spurious_tracks": 0,
+    "centroid_err_km": 8.089168448153773,
+    "detect_lag_h": 0
+   },
+   "gnn_temporal": {
+    "iou": 0.09179999130485678,
+    "csi": 0.7234432234432234,
+    "pod": 0.8229166666666666,
+    "far": 0.14316702819956617,
+    "spurious_tracks": 1,
+    "centroid_err_km": 7.591633328842321,
+    "detect_lag_h": 0
+   },
+   "gnn_cross": {
+    "iou": 0.024072479981564046,
+    "csi": 0.7106690777576854,
+    "pod": 0.81875,
+    "far": 0.15665236051502146,
+    "spurious_tracks": 4,
+    "centroid_err_km": 8.089168448153773,
+    "detect_lag_h": 0
+   },
+   "gnn_none": {
+    "iou": 0.02507549998079588,
+    "csi": 0.7135135135135136,
+    "pod": 0.825,
+    "far": 0.1592356687898089,
+    "spurious_tracks": 4,
+    "centroid_err_km": 8.089168448153773,
+    "detect_lag_h": 0
+   }
+  },
+  "split": "test",
+  "downscaling": "pending: reports/downscaling_results.json not produced yet"
+ },
+ "export_seconds": 80.2
+}

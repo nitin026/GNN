@@ -18,3 +18,10 @@ logs/
 bundle/
 training_bundle.zip
 data/graphs/
+backend/products/*
+!backend/products/index.json
+!backend/products/amphan_replay/
+!backend/products/cyc_04/
+!backend/products/heat_04/
+!backend/products/cold_04/
+!backend/products/amphan_era5_real/
