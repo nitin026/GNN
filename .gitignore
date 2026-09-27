@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+# large binary data is reproducible via `make all`; not committed
+data/real/**/*.nc
+data/real/**/*.zarr
+data/real/**/*.tif
+data/real/raw/
+data/synthetic/**/*.nc
