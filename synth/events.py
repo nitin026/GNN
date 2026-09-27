@@ -84,7 +84,7 @@ def tropical_cyclone(lat2d, lon2d, lat0, lon0, vmax, rmw_km, dp=None, B=None,
     core = np.exp(-(r / (4 * rmw_km + 150.0)) ** 2)
     return {"dmsl": dmsl.astype(np.float32), "du10": du.astype(np.float32),
             "dv10": dv.astype(np.float32), "rain_rate": rain.astype(np.float32),
-            "core": core.astype(np.float32)}
+            "core": core.astype(np.float32), "vmax": float(vmax)}
 
 
 def lifecycle_vmax(t_h, t_genesis, t_peak, v0, vpeak, landfall_h=None, vb=13.8, alpha=0.095):

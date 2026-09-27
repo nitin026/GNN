@@ -22,6 +22,9 @@ from .events import local_xy
 ROOT = Path(__file__).resolve().parents[1]
 REAL = ROOT / "data" / "real"
 CLIP_C = 1.5
+# t2m is clipped harder (1.0 sigma ~ 3 K) so a real background heat/cold wave cannot meet the
+# IMD 4.5 C departure criterion on its own (it would be an unlabelled event)
+CLIP_VAR = {"t2m": 1.0, "msl": 1.5, "tp": 1.5}
 
 
 def interp_matrix(src, dst):
@@ -68,7 +71,8 @@ class RealBackground:
             tr["time"] = pd.to_datetime(tr.ISO_TIME)
             self.track = tr[["time", "LAT", "LON"]]
         self.lat2d, self.lon2d = np.meshgrid(self.lat, self.lon, indexing="ij")
-        self.source = f"ERA5 {event} (real, anomalies soft-clipped at {CLIP_C} sigma)"
+        self.source = (f"ERA5 {event} (real, anomalies soft-clipped: t2m {CLIP_VAR['t2m']} sigma, "
+                       f"msl/tp {CLIP_VAR['msl']} sigma)")
 
     def times(self):
         return pd.to_datetime(self.ds.time.values)
@@ -89,7 +93,7 @@ class RealBackground:
             x = snap[v].values.astype(np.float64)
             if v in ("t2m", "msl", "tp"):
                 m, s = self._clim(v, t)
-                x = softclip(x, m, s)
+                x = softclip(x, m, s, CLIP_VAR[v])
             out[v] = x
         if "tp" in out:
             out["tp"] = np.maximum(out["tp"], 0)

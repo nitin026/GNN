@@ -89,8 +89,8 @@
   "2022-12-29T18:00:00",
   "2022-12-30T00:00:00"
  ],
- "background": "ERA5 coldwave (real, anomalies soft-clipped at 1.5 sigma)",
- "generator": "synth-0.1",
+ "background": "ERA5 coldwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma)",
+ "generator": "synth-0.2",
  "seed": 301,
  "variables": [
   "t2m",

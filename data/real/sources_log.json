@@ -160,5 +160,23 @@
   "time_range": "1990-2019",
   "note": "std per hour/doy from 1.5 deg ERA5 with a +-15-day window; interpolated to 0.25/G12. G5 climatology not written (anomalies are computed at 12 km).",
   "logged_at": "2026-09-27T12:40:39+00:00"
+ },
+ {
+  "source": "ERA5 coldwave 850 hPa q/u/v (daily 12 UTC)",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 19.8,
+  "time_range": "2022-12-20 .. 2023-01-20 daily 12 UTC",
+  "note": "32 steps; 990s; direct HTTPS chunk reads (fsspec timed out on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate",
+  "logged_at": "2026-09-27T14:51:30+00:00"
+ },
+ {
+  "source": "ERA5 heatwave 850 hPa q/u/v (daily 12 UTC)",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 23.1,
+  "time_range": "2024-05-15 .. 2024-06-20 daily 12 UTC",
+  "note": "37 steps; 2800s; direct HTTPS chunk reads (fsspec timed out on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate",
+  "logged_at": "2026-09-27T15:38:10+00:00"
  }
 ]

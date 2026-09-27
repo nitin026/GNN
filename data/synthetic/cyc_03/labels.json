@@ -89,8 +89,8 @@
   "2020-05-22T18:00:00",
   "2020-05-23T00:00:00"
  ],
- "background": "ERA5 amphan (real, anomalies soft-clipped at 1.5 sigma)",
- "generator": "synth-0.1",
+ "background": "ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma)",
+ "generator": "synth-0.2",
  "seed": 103,
  "variables": [
   "t2m",

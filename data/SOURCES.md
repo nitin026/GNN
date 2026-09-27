@@ -22,6 +22,8 @@ Every real-data source attempted by `scripts/fetch_real.py` is listed here with 
 | ERA5 amphan 850 hPa relative humidity | https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr | OK |  | 2020-05-10T00 .. 2020-05-25T18 (6-hourly) | r850 added to amphan files; 604s | 2026-09-27T12:35:58+00:00 |
 | ERA5 climatology (mean) | https://storage.googleapis.com/weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_1440x721.zarr | OK | 694.1 | 1990-2019, day-of-year 94 days | 1559s; vars t2m,msl,tp mean | 2026-09-27T12:40:39+00:00 |
 | ERA5 climatology (std) | https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-6h-240x121_equiangular_with_poles_conservative.zarr | OK |  | 1990-2019 | std per hour/doy from 1.5 deg ERA5 with a +-15-day window; interpolated to 0.25/G12. G5 climatology not written (anomalies are computed at 12 km). | 2026-09-27T12:40:39+00:00 |
+| ERA5 coldwave 850 hPa q/u/v (daily 12 UTC) | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | OK | 19.8 | 2022-12-20 .. 2023-01-20 daily 12 UTC | 32 steps; 990s; direct HTTPS chunk reads (fsspec timed out on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate | 2026-09-27T14:51:30+00:00 |
+| ERA5 heatwave 850 hPa q/u/v (daily 12 UTC) | https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3 | OK | 23.1 | 2024-05-15 .. 2024-06-20 daily 12 UTC | 37 steps; 2800s; direct HTTPS chunk reads (fsspec timed out on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate | 2026-09-27T15:38:10+00:00 |
 
 ## Synthetic data
 

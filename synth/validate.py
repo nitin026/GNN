@@ -306,8 +306,14 @@ def main():
     sp = spectra(labs)
     cp = cyclone_profile(labs)
     crit, real_ref = imd_criteria(labs)
+    from .rain_calibration import imd_amphan_sample, quantiles, synth_sample
+    swath = {"IMD Amphan 2020 (real)": quantiles(imd_amphan_sample())}
+    for cid, l in labs.items():
+        if l["hazard"] == "tropical_cyclone":
+            swath[cid] = quantiles(synth_sample(cid))
     (REP / "synth_validation.json").write_text(json.dumps(
-        {"hist": h, "rain": rain, "spectra": sp, "cyclone": cp, "imd": crit, "real_ref": real_ref},
+        {"hist": h, "rain": rain, "swath": swath, "spectra": sp, "cyclone": cp, "imd": crit,
+         "real_ref": real_ref},
         indent=1, default=float))
     units = {"t2m": "K", "msl": "Pa", "wind10": "m/s", "tp": "mm/6h"}
     L = ["# Synthetic-data realism check (Phase 4)", "",
@@ -328,6 +334,17 @@ def main():
           "| source | p99 (mm/day) | p99.9 (mm/day) | max (mm/day) |", "|---|---|---|---|"]
     for r in rain:
         L.append(f"| {r['source']} | {f(r['p99'], 1)} | {f(r['p999'], 1)} | {f(r['max'], 1)} |")
+    ref = swath["IMD Amphan 2020 (real)"]
+    L += ["", "### Cyclone rain swath vs IMD Amphan (calibration target)", "",
+          "Daily land rain within 500 km of the storm centre, ~0.25 deg, wet cells (>= 1 mm/day). "
+          "Cyclone rain is quantile-mapped to IMD Amphan (`synth/rain_qm.json`, fitted on the TRAIN "
+          "cases cyc_01 and cyc_02 only). Target: p99 within 20 % of IMD.", "",
+          "| sample | n | p50 | p90 | p99 | p99 vs IMD | p99.9 | max |", "|---|---|---|---|---|---|---|---|"]
+    for k, q in swath.items():
+        if not q.get("n"):
+            continue
+        L.append(f"| {k} | {q['n']} | {f(q['p50'], 1)} | {f(q['p90'], 1)} | {f(q['p99'], 1)} | "
+                 f"{(q['p99'] / ref['p99'] - 1) * 100:+.0f} % | {f(q['p999'], 1)} | {f(q['max'], 1)} |")
     L += ["", "## 2. Radially averaged power spectra", "",
           "| variable | case / time | slope 20-200 km, SYNTHETIC | slope 20-200 km, ERA5 interp. 5 km | "
           "power ratio syn/ERA5-interp at 25 km |", "|---|---|---|---|---|"]
@@ -392,13 +409,17 @@ def limitations(h, sp, cp, crit, rain):
     tc = next((r for r in h if r["hazard"] == "tropical_cyclone" and r["var"] == "tp"), None)
     imd = next((r for r in rain if r["source"].startswith("IMD")), None)
     syn_d = [r for r in rain if r["source"].startswith("SYNTHETIC")]
-    out.append("- **Rain amounts are parametric and the local maxima are too extreme.** The eyewall peak rate "
-               "is 3 + 0.3*Vmax mm/h, gated by 850 hPa moisture-flux convergence and scaled by the upslope "
-               "factor (<= 2x). The p99 values are close to real ones, but the maxima are not: the synthetic "
+    ratio = max(r["max"] for r in syn_d) / imd["max"]
+    head = ("the local maxima are still too extreme" if ratio > 1.3 else
+            "local maxima are now close to IMD")
+    out.append(f"- **Rain amounts are parametric; {head}.** The eyewall peak rate "
+               "is 3 + 0.3*Vmax mm/h, gated by 850 hPa moisture-flux convergence, scaled by the upslope "
+               "factor (<= 2x) and quantile-mapped to IMD Amphan (fitted on 2 train cases). The "
                f"6-h maximum is {tc['syn_max']:.0f} mm against {tc['real_max']:.0f} mm in ERA5, and the daily "
                f"land maxima reach up to {max(r['max'] for r in syn_d):.0f} mm/day against {imd['max']:.0f} "
-               "mm/day in IMD (May 2020). The eyewall rain is therefore too intense locally, especially where it "
-               "meets the orographic factor. The gating uses ERA5 850 hPa moisture and winds (Amphan window only). "
+               "mm/day in IMD (May 2020); the swath table above has the calibrated comparison. "
+               "Calibrating every storm to one storm (Amphan) is itself an "
+               "assumption. The gating uses ERA5 850 hPa moisture and winds (Amphan window only). "
                "Heat and cold cases inject no rain; they only damp the background.")
     out.append("- **Heat domes and cold waves are 2-D surface blobs.** They have no vertical structure (the "
                "4-D box level range is surface-only), and their wind response is a geostrophic "

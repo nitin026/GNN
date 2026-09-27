@@ -12,6 +12,7 @@ Every file carries the global attribute synthetic="true".
 """
 import datetime as dt
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -20,18 +21,21 @@ import netCDF4
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, uniform_filter
 
 from . import events as ev
 from .background import Regridder, load_background
 from .grids import LAT5, LON5, LAT12, LON12, avgpool
 from .noise import AR1Noise, spectral_noise
 from .physics import cap_rh, moisture_flux_convergence, orographic_factor, place_rain
+from .rain_calibration import QM as RAIN_QM_PATH, apply_factor
 from .tracks import amphan_track, ni_library, sample_track
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "data" / "synthetic"
-VERSION = "synth-0.1"
+OUT = Path(os.environ.get("SIH_SYN_OUT", ROOT / "data" / "synthetic"))
+VERSION = "synth-0.2"   # 0.2: t2m background clip 1.0 sigma + global IMD rain QM (option A)
+RAIN_QM = (json.loads(RAIN_QM_PATH.read_text())
+           if RAIN_QM_PATH.exists() and os.environ.get("SIH_RAIN_QM", "on") != "off" else None)
 LEADS = np.arange(0, 241, 6)
 N_MEMBERS = 20
 KM = ev.KM_PER_DEG
@@ -300,6 +304,7 @@ def compose(bg, incs, hazard, lat, lon, orog, dxkm, dykm):
     f = {k: v.astype(np.float64).copy() for k, v in bg.items()}
     lat2d = lat[:, None] * np.ones((1, len(lon)))
     signal = np.zeros_like(f["t2m"])
+    inj = []                                   # (injected 6-h rain, vortex Vmax) per vortex
     for inc in incs:
         if inc is None:
             continue
@@ -312,7 +317,7 @@ def compose(bg, incs, hazard, lat, lon, orog, dxkm, dykm):
             v8 = f.get("v850", f["v10"]) + 1.1 * inc["dv10"]
             mfc = moisture_flux_convergence(q, u8, v8, lat, lon)
             oro = orographic_factor(f["u10"], f["v10"], orog, lat, lon)
-            f["tp"] += place_rain(inc["rain_rate"], mfc, oro)
+            inj.append((place_rain(inc["rain_rate"], mfc, oro), inc["vmax"]))
             if "r850" in f:
                 f["r850"] += (97.0 - f["r850"]) * inc["core"]
             signal = np.minimum(signal, inc["dmsl"])
@@ -324,10 +329,25 @@ def compose(bg, incs, hazard, lat, lon, orog, dxkm, dykm):
             f["v10"] += dv
             f["tp"] *= inc["rain_factor"]
             signal = signal + inc["dt2m"]
+    if inj:
+        total = f["tp"] + sum(r for r, _ in inj)
+        for r, vmax in inj:
+            f["tp"] += r * rain_qm_factor(total, lat, vmax)
     f["tp"] = np.maximum(f["tp"], 0.0)
     if "r850" in f:
         f["r850"] = cap_rh(f["r850"])
     return f, signal
+
+
+def rain_qm_factor(tp6, lat, vmax=None):
+    """Intensity-aware quantile-mapping factor for injected cyclone rain (synth/rain_qm.json,
+    fitted on TRAIN cases against IMD Amphan). Driven by the local daily-equivalent rain
+    D = 4 x (6-h rain averaged over ~0.24 deg) and the vortex Vmax; 1 if no table exists."""
+    if RAIN_QM is None:
+        return 1.0
+    size = max(1, int(round(0.24 / (lat[1] - lat[0]))))
+    D = 4.0 * uniform_filter(tp6, size=size, mode="nearest")
+    return np.where(D >= 1.0, apply_factor(D, RAIN_QM, vmax), 1.0)
 
 
 def mask_from_signal(hazard, signal):

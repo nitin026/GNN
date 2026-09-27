@@ -1,0 +1,250 @@
+{
+ "chosen": {
+  "tropical_cyclone": {
+   "params": {
+    "high": 2.0,
+    "low": 2.0,
+    "min_area_km2": 3000.0
+   },
+   "trainval": {
+    "hazard": "tropical_cyclone",
+    "high": 2.0,
+    "low": 2.0,
+    "min_area_km2": 3000.0,
+    "iou_trainval": 0.5227361273023977,
+    "iou_daily_trainval": 0.5370707740117983,
+    "spurious_per_case_trainval": 8.333333333333334
+   },
+   "cases": [
+    "cyc_01",
+    "cyc_02",
+    "cyc_03"
+   ]
+  },
+  "heat_dome": {
+   "params": {
+    "high": 4.5,
+    "low": 3.5,
+    "min_area_km2": 50000.0
+   },
+   "trainval": {
+    "hazard": "heat_dome",
+    "high": 4.5,
+    "low": 3.5,
+    "min_area_km2": 50000.0,
+    "iou_trainval": 0.3331697231408676,
+    "iou_daily_trainval": 0.42923604905875495,
+    "spurious_per_case_trainval": 5.833333333333334
+   },
+   "cases": [
+    "heat_01",
+    "heat_02",
+    "heat_03"
+   ]
+  },
+  "cold_wave": {
+   "params": {
+    "high": 4.5,
+    "low": 3.5,
+    "min_area_km2": 50000.0
+   },
+   "trainval": {
+    "hazard": "cold_wave",
+    "high": 4.5,
+    "low": 3.5,
+    "min_area_km2": 50000.0,
+    "iou_trainval": 0.2018767334877202,
+    "iou_daily_trainval": 0.32159975778072764,
+    "spurious_per_case_trainval": 10.0
+   },
+   "cases": [
+    "cold_01",
+    "cold_02",
+    "cold_03"
+   ]
+  }
+ },
+ "grid": [
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.0,
+   "low": 1.5,
+   "min_area_km2": 3000.0,
+   "iou_trainval": 0.45465049381965833,
+   "iou_daily_trainval": 0.48029706062775396,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.0,
+   "low": 1.5,
+   "min_area_km2": 8000.0,
+   "iou_trainval": 0.45465049381965833,
+   "iou_daily_trainval": 0.48029706062775396,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.0,
+   "low": 2.0,
+   "min_area_km2": 3000.0,
+   "iou_trainval": 0.5227361273023977,
+   "iou_daily_trainval": 0.5370707740117983,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.0,
+   "low": 2.0,
+   "min_area_km2": 8000.0,
+   "iou_trainval": 0.5199078444741149,
+   "iou_daily_trainval": 0.5292929962340205,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.5,
+   "low": 1.5,
+   "min_area_km2": 3000.0,
+   "iou_trainval": 0.45465049381965833,
+   "iou_daily_trainval": 0.48029706062775396,
+   "spurious_per_case_trainval": 7.5
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.5,
+   "low": 1.5,
+   "min_area_km2": 8000.0,
+   "iou_trainval": 0.45465049381965833,
+   "iou_daily_trainval": 0.48029706062775396,
+   "spurious_per_case_trainval": 7.5
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.5,
+   "low": 2.0,
+   "min_area_km2": 3000.0,
+   "iou_trainval": 0.5227361273023977,
+   "iou_daily_trainval": 0.5370707740117983,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "high": 2.5,
+   "low": 2.0,
+   "min_area_km2": 8000.0,
+   "iou_trainval": 0.5199078444741149,
+   "iou_daily_trainval": 0.5292929962340205,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 2.0,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.21906854550958554,
+   "iou_daily_trainval": 0.29078442248487196,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 2.0,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.19229981447573516,
+   "iou_daily_trainval": 0.2508602098543445,
+   "spurious_per_case_trainval": 4.166666666666667
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 3.0,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.22100025370867302,
+   "iou_daily_trainval": 0.2879870791279417,
+   "spurious_per_case_trainval": 10.0
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 3.0,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.21851607977700352,
+   "iou_daily_trainval": 0.2879870791279417,
+   "spurious_per_case_trainval": 5.0
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 3.5,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.31581118155173704,
+   "iou_daily_trainval": 0.4006107883954188,
+   "spurious_per_case_trainval": 8.333333333333334
+  },
+  {
+   "hazard": "heat_dome",
+   "high": 4.5,
+   "low": 3.5,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.3331697231408676,
+   "iou_daily_trainval": 0.42923604905875495,
+   "spurious_per_case_trainval": 5.833333333333334
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 2.0,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.15309844763328273,
+   "iou_daily_trainval": 0.21759646139771338,
+   "spurious_per_case_trainval": 20.0
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 2.0,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.15663838697223567,
+   "iou_daily_trainval": 0.22307664210053094,
+   "spurious_per_case_trainval": 15.833333333333332
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 3.0,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.22333582196410026,
+   "iou_daily_trainval": 0.3258524367664833,
+   "spurious_per_case_trainval": 19.166666666666668
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 3.0,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.22333582196410026,
+   "iou_daily_trainval": 0.3258524367664833,
+   "spurious_per_case_trainval": 12.5
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 3.5,
+   "min_area_km2": 20000.0,
+   "iou_trainval": 0.22972358947970828,
+   "iou_daily_trainval": 0.34751997367973947,
+   "spurious_per_case_trainval": 16.666666666666668
+  },
+  {
+   "hazard": "cold_wave",
+   "high": 4.5,
+   "low": 3.5,
+   "min_area_km2": 50000.0,
+   "iou_trainval": 0.2018767334877202,
+   "iou_daily_trainval": 0.32159975778072764,
+   "spurious_per_case_trainval": 10.0
+  }
+ ],
+ "note": "selected on TRAIN+VAL only; TEST untouched"
+}

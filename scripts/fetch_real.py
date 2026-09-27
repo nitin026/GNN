@@ -206,6 +206,76 @@ def rh850():
         f"{s} .. {e} (6-hourly)", f"r850 added to amphan files; {time.time() - t0:.0f}s")
 
 
+def _arco_chunk(var, ti, shape, dtype, level_idx):
+    """Fetch one ARCO 3-D chunk (1, 37, 721, 1440) over HTTPS and return the 850 hPa India box."""
+    import numcodecs
+    url = f"{GCS}/{ARCO}/{var}/{ti}.0.0.0"
+    last = None
+    for k in range(4):
+        try:
+            r = requests.get(url, timeout=(20, 300))
+            r.raise_for_status()
+            a = np.frombuffer(numcodecs.Blosc().decode(r.content), dtype=dtype).reshape(shape)
+            box = a[level_idx, 200:361, 240:401]            # lat 40..0 (desc), lon 60..100
+            return box[::-1].astype(np.float32)             # ascending latitude
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(5 * (k + 1))
+    raise last
+
+
+def era5_850_daily():
+    """850 hPa q/u/v for the cold-wave and heatwave windows, once a day at 12 UTC.
+    ARCO 3-D chunks hold all 37 levels of the globe (~100 MB), so daily is the feasible rate.
+    Chunks are fetched directly over HTTPS with retries (fsspec timed out on 100 MB objects)."""
+    from concurrent.futures import ThreadPoolExecutor
+    import numcodecs
+    meta = requests.get(f"{GCS}/{ARCO}/.zmetadata", timeout=60).json()["metadata"]
+    lev = np.frombuffer(numcodecs.Blosc().decode(
+        requests.get(f"{GCS}/{ARCO}/level/0", timeout=60).content), dtype="<i8")
+    li = int(np.where(lev == 850)[0][0])
+    tz = meta["time/.zarray"]
+    tvals = []
+    for c in range(-(-tz["shape"][0] // tz["chunks"][0])):
+        raw = requests.get(f"{GCS}/{ARCO}/time/{c}", timeout=120).content
+        tvals.append(np.frombuffer(numcodecs.Blosc().decode(raw), dtype=tz["dtype"]))
+    tvals = np.concatenate(tvals)[:tz["shape"][0]]
+    t_units = meta["time/.zattrs"]["units"]            # "hours since 1900-01-01 ..."
+    base = pd.Timestamp(t_units.split("since")[1].strip())
+    lat = np.arange(0, 40.01, 0.25)
+    lon = np.arange(60, 100.01, 0.25)
+    for name in ("coldwave", "heatwave"):
+        s, e = EVENTS[name][:2]
+        t0 = time.time()
+        times = pd.date_range(pd.Timestamp(s).normalize() + pd.Timedelta("12h"), e, freq="24h")
+        hours = ((times - base) / pd.Timedelta("1h")).astype(np.int64)
+        tidx = np.searchsorted(tvals, hours)
+        assert np.all(tvals[tidx] == hours), "time index lookup failed"
+        out = {}
+        for var, short in PL850.items():
+            za = meta[f"{var}/.zarray"]
+            shp = tuple(za["chunks"][1:])
+            with ThreadPoolExecutor(8) as ex:
+                arrs = list(ex.map(lambda ti: _arco_chunk(var, int(ti), shp, za["dtype"], li), tidx))
+            out[short] = (("time", "latitude", "longitude"), np.stack(arrs),
+                          {"units": ATTRS["units"][short], "long_name": ATTRS["long"][short]})
+            print(f"  {name} {short}: {len(arrs)} chunks, {time.time() - t0:.0f}s", flush=True)
+        ds = xr.Dataset(out, coords={"time": times, "latitude": lat, "longitude": lon},
+                        attrs={"Conventions": "CF-1.8", "synthetic": "false", "source": "ARCO-ERA5",
+                               "title": f"ERA5 850 hPa q/u/v, India box, {name}, daily 12 UTC"})
+        d = REAL / "era5"
+        p0 = d / f"{name}_era5_850_daily_0p25.nc"
+        ds.to_netcdf(p0, encoding={v: {"zlib": True, "dtype": "float32"} for v in ds.data_vars})
+        g = regrid(ds, "g12")
+        g.attrs = dict(ds.attrs, grid="g12")
+        p1 = d / f"{name}_era5_850_daily_g12.nc"
+        g.to_netcdf(p1, encoding=packed_encoding(g))
+        log(f"ERA5 {name} 850 hPa q/u/v (daily 12 UTC)", f"{GCS}/{ARCO}", "OK", dir_mb(p0, p1),
+            f"{times[0]:%Y-%m-%d} .. {times[-1]:%Y-%m-%d} daily 12 UTC",
+            f"{len(times)} steps; {time.time() - t0:.0f}s; direct HTTPS chunk reads (fsspec timed out "
+            "on 100 MB chunks); fills the earlier 6-hourly SKIP at a daily rate")
+
+
 # ----------------------------------------------------------------------------- climatology
 WINDOWS = {"amphan": ("2020-05-10", "2020-05-25"), "coldwave": ("2022-12-20", "2023-01-20"),
            "heatwave": ("2024-05-15", "2024-06-20")}
@@ -427,7 +497,7 @@ def keyed():
             log(src, url, "SKIPPED", note="key present but downloader not implemented in this phase")
 
 
-STEPS = {"era5": era5, "rh850": rh850, "repack": repack, "clim": clim, "ibtracs": ibtracs, "dem": dem, "imd": imd, "keyed": keyed}
+STEPS = {"era5": era5, "rh850": rh850, "era5_850_daily": era5_850_daily, "repack": repack, "clim": clim, "ibtracs": ibtracs, "dem": dem, "imd": imd, "keyed": keyed}
 
 if __name__ == "__main__":
     REAL.mkdir(parents=True, exist_ok=True)

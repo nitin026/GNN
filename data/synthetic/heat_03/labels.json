@@ -89,8 +89,8 @@
   "2024-06-07T18:00:00",
   "2024-06-08T00:00:00"
  ],
- "background": "ERA5 heatwave (real, anomalies soft-clipped at 1.5 sigma)",
- "generator": "synth-0.1",
+ "background": "ERA5 heatwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma)",
+ "generator": "synth-0.2",
  "seed": 203,
  "variables": [
   "t2m",
