@@ -40,8 +40,10 @@ def radial_spectrum(field, dx_km):
     f = f - f.mean()
     ny, nx = f.shape
     wy, wx = np.hanning(ny), np.hanning(nx)
-    F = np.fft.fftshift(np.fft.fft2(f * wy[:, None] * wx[None, :]))
-    P = np.abs(F) ** 2
+    win = wy[:, None] * wx[None, :]
+    F = np.fft.fftshift(np.fft.fft2(f * win))
+    # power spectral density (units^2 km^2), window-power corrected: comparable across grids
+    P = np.abs(F) ** 2 * dx_km ** 2 / (nx * ny * np.mean(win ** 2))
     ky = np.fft.fftshift(np.fft.fftfreq(ny, d=dx_km))
     kx = np.fft.fftshift(np.fft.fftfreq(nx, d=dx_km))
     k = np.sqrt(ky[:, None] ** 2 + kx[None, :] ** 2)

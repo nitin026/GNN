@@ -1,0 +1,300 @@
+{
+ "hist": [
+  {
+   "hazard": "tropical_cyclone",
+   "var": "t2m",
+   "syn_p99": 313.03999999999996,
+   "real_p99": 313.90999999999997,
+   "syn_p50": 301.38,
+   "real_p50": 301.46999999999997,
+   "syn_max": 318.9,
+   "real_max": 318.84999999999997
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "var": "msl",
+   "syn_p99": 102355.0,
+   "real_p99": 102643.01000000001,
+   "syn_p50": 100787.0,
+   "real_p50": 100847.0,
+   "syn_max": 103242.0,
+   "real_max": 103948.0
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "var": "wind10",
+   "syn_p99": 12.749844704927053,
+   "real_p99": 13.121602036021399,
+   "syn_p50": 3.464130482530934,
+   "real_p50": 3.3016965336020814,
+   "syn_max": 60.40748711873388,
+   "real_max": 30.652205467143798
+  },
+  {
+   "hazard": "tropical_cyclone",
+   "var": "tp",
+   "syn_p99": 15.040000000000001,
+   "real_p99": 15.01,
+   "syn_p50": 0.18,
+   "real_p50": 0.02,
+   "syn_max": 328.5,
+   "real_max": 162.99
+  },
+  {
+   "hazard": "heat_dome",
+   "var": "t2m",
+   "syn_p99": 315.84999999999997,
+   "real_p99": 315.7,
+   "syn_p50": 301.71999999999997,
+   "real_p50": 301.91999999999996,
+   "syn_max": 324.06,
+   "real_max": 322.90999999999997
+  },
+  {
+   "hazard": "heat_dome",
+   "var": "msl",
+   "syn_p99": 102400.0,
+   "real_p99": 102444.0,
+   "syn_p50": 100796.0,
+   "real_p50": 100777.0,
+   "syn_max": 103276.0,
+   "real_max": 104046.0
+  },
+  {
+   "hazard": "heat_dome",
+   "var": "wind10",
+   "syn_p99": 11.915746892238843,
+   "real_p99": 12.076288543663331,
+   "syn_p50": 3.894900512076018,
+   "real_p50": 3.8038204478670177,
+   "syn_max": 20.760655095637034,
+   "real_max": 21.970275373786283
+  },
+  {
+   "hazard": "heat_dome",
+   "var": "tp",
+   "syn_p99": 8.86,
+   "real_p99": 14.94,
+   "syn_p50": 0.12,
+   "real_p50": 0.08,
+   "syn_max": 33.58,
+   "real_max": 230.12
+  },
+  {
+   "hazard": "cold_wave",
+   "var": "t2m",
+   "syn_p99": 301.65999999999997,
+   "real_p99": 302.07,
+   "syn_p50": 296.03999999999996,
+   "real_p50": 296.19,
+   "syn_max": 305.81,
+   "real_max": 306.63
+  },
+  {
+   "hazard": "cold_wave",
+   "var": "msl",
+   "syn_p99": 103723.0,
+   "real_p99": 104135.01000000001,
+   "syn_p50": 101574.0,
+   "real_p50": 101519.0,
+   "syn_max": 105173.0,
+   "real_max": 105791.0
+  },
+  {
+   "hazard": "cold_wave",
+   "var": "wind10",
+   "syn_p99": 9.609048131838572,
+   "real_p99": 9.40490340194848,
+   "syn_p50": 3.3549068541466243,
+   "real_p50": 2.842340584799788,
+   "syn_max": 17.61216908844564,
+   "real_max": 15.542808626499909
+  },
+  {
+   "hazard": "cold_wave",
+   "var": "tp",
+   "syn_p99": 4.0200000000000005,
+   "real_p99": 5.5600000000000005,
+   "syn_p50": 0.0,
+   "real_p50": 0.0,
+   "syn_max": 22.240000000000002,
+   "real_max": 118.2
+  }
+ ],
+ "rain": [
+  {
+   "source": "IMD 0.25 deg (real), 2020-05-10..25",
+   "p99": 43.536415100097656,
+   "p999": 138.5537872314453,
+   "max": 318.1878662109375
+  },
+  {
+   "source": "SYNTHETIC amphan_replay (12 km, daily, land)",
+   "p99": 28.284488677978516,
+   "p999": 112.66900634765625,
+   "max": 312.284423828125
+  },
+  {
+   "source": "SYNTHETIC cyc_01 (12 km, daily, land)",
+   "p99": 36.52668762207031,
+   "p999": 180.1246337890625,
+   "max": 627.3599853515625
+  },
+  {
+   "source": "SYNTHETIC cyc_02 (12 km, daily, land)",
+   "p99": 24.453378677368164,
+   "p999": 88.38671875,
+   "max": 251.39111328125
+  },
+  {
+   "source": "SYNTHETIC cyc_03 (12 km, daily, land)",
+   "p99": 25.053375244140625,
+   "p999": 102.10234832763672,
+   "max": 522.3955688476562
+  },
+  {
+   "source": "SYNTHETIC cyc_04 (12 km, daily, land)",
+   "p99": 28.342422485351562,
+   "p999": 155.12001037597656,
+   "max": 552.7022094726562
+  },
+  {
+   "source": "ERA5 G12 (real), 2020-05-10..25, daily, land",
+   "p99": 29.210100000000093,
+   "p999": 85.51001000000048,
+   "max": 153.85
+  }
+ ],
+ "spectra": {
+  "t2m": {
+   "case": "heat_01",
+   "valid_time": "2024-05-20 00:00:00",
+   "slope_syn_20_200km": -3.5208165043396384,
+   "slope_era5interp_20_200km": -5.475375753898819,
+   "power_ratio_syn_over_era5interp_at_25km": 19.22499683121745
+  },
+  "u10": {
+   "case": "amphan_replay",
+   "valid_time": "2020-05-20 06:00:00",
+   "slope_syn_20_200km": -3.052836986779728,
+   "slope_era5interp_20_200km": -5.330976822704876,
+   "power_ratio_syn_over_era5interp_at_25km": 69.64139514067512
+  }
+ },
+ "cyclone": {
+  "valid_time": "2020-05-18 12:00:00",
+  "lead_h": 78,
+  "syn_vmax_azimean": 65.2942368908956,
+  "syn_rmw_km": 17.5,
+  "syn_vmax_point": 70.41095937423378,
+  "ib_vmax_10min_ms": 65.6430544,
+  "ib_vmax_1min_kt": 145.0,
+  "ib_rmw_km": 18.52,
+  "era5_vmax_azimean": 26.424349149068195,
+  "era5_rmw_km": 87.5,
+  "era5_vmax_point": 29.226024627685547
+ },
+ "imd": [
+  {
+   "case": "cold_01",
+   "hazard": "cold_wave",
+   "peak_day": "2022-12-23",
+   "mean_departure_C": -4.01982307434082,
+   "max_departure_C": -7.345794677734375,
+   "frac_ge_4p5": 0.4165196942974721,
+   "frac_ge_6p5": 0.026748971193415638,
+   "frac_abs_threshold": 0.9488536155202821,
+   "frac_imd_heatwave": 0.4165196942974721,
+   "injected_peak_K": 5.603
+  },
+  {
+   "case": "cold_02",
+   "hazard": "cold_wave",
+   "peak_day": "2023-01-01",
+   "mean_departure_C": -3.737962245941162,
+   "max_departure_C": -6.337310791015625,
+   "frac_ge_4p5": 0.2872093023255814,
+   "frac_ge_6p5": 0.0,
+   "frac_abs_threshold": 0.9806201550387597,
+   "frac_imd_heatwave": 0.2872093023255814,
+   "injected_peak_K": 7.039
+  },
+  {
+   "case": "cold_03",
+   "hazard": "cold_wave",
+   "peak_day": "2023-01-06",
+   "mean_departure_C": -6.44455099105835,
+   "max_departure_C": -8.22625732421875,
+   "frac_ge_4p5": 0.9752198241406874,
+   "frac_ge_6p5": 0.47961630695443647,
+   "frac_abs_threshold": 1.0,
+   "frac_imd_heatwave": 0.9752198241406874,
+   "injected_peak_K": 4.858
+  },
+  {
+   "case": "cold_04",
+   "hazard": "cold_wave",
+   "peak_day": "2023-01-10",
+   "mean_departure_C": -4.141872406005859,
+   "max_departure_C": -7.11773681640625,
+   "frac_ge_4p5": 0.3967391304347826,
+   "frac_ge_6p5": 0.062111801242236024,
+   "frac_abs_threshold": 1.0,
+   "frac_imd_heatwave": 0.3967391304347826,
+   "injected_peak_K": 6.248
+  },
+  {
+   "case": "heat_01",
+   "hazard": "heat_dome",
+   "peak_day": "2024-05-20",
+   "mean_departure_C": 7.5091447830200195,
+   "max_departure_C": 11.0760498046875,
+   "frac_ge_4p5": 0.9907470097043557,
+   "frac_ge_6p5": 0.701647483638005,
+   "frac_abs_threshold": 0.9221394719025051,
+   "frac_imd_heatwave": 0.9153689911983751,
+   "injected_peak_K": 7.963
+  },
+  {
+   "case": "heat_02",
+   "hazard": "heat_dome",
+   "peak_day": "2024-05-29",
+   "mean_departure_C": 7.299699783325195,
+   "max_departure_C": 9.7216796875,
+   "frac_ge_4p5": 1.0,
+   "frac_ge_6p5": 0.8120603015075377,
+   "frac_abs_threshold": 0.9698492462311558,
+   "frac_imd_heatwave": 0.9698492462311558,
+   "injected_peak_K": 5.385
+  },
+  {
+   "case": "heat_03",
+   "hazard": "heat_dome",
+   "peak_day": "2024-05-31",
+   "mean_departure_C": 7.5647382736206055,
+   "max_departure_C": 11.179840087890625,
+   "frac_ge_4p5": 0.9437258525113388,
+   "frac_ge_6p5": 0.796909121451369,
+   "frac_abs_threshold": 0.8224424659835378,
+   "frac_imd_heatwave": 0.8221065009239039,
+   "injected_peak_K": 7.124
+  },
+  {
+   "case": "heat_04",
+   "hazard": "heat_dome",
+   "peak_day": "2024-06-13",
+   "mean_departure_C": 4.52762508392334,
+   "max_departure_C": 7.41229248046875,
+   "frac_ge_4p5": 0.529723991507431,
+   "frac_ge_6p5": 0.04670912951167728,
+   "frac_abs_threshold": 0.0,
+   "frac_imd_heatwave": 0.0,
+   "injected_peak_K": 6.146
+  }
+ ],
+ "real_ref": {
+  "era5_2024_nw_india_peak_day": "2024-05-27",
+  "era5_box_mean_tmax_departure_C": 5.847240660468521,
+  "era5_box_mean_tmax_C": 44.43655377668313
+ }
+}
