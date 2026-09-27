@@ -1,0 +1,16 @@
+{
+ "model": "unet",
+ "epochs": 20,
+ "batch": 16,
+ "lr": 0.0002,
+ "base": 16,
+ "crop12": 32,
+ "seed": 0,
+ "best_epoch": 19,
+ "best_val_loss": 0.08136656867532895,
+ "train_seconds": 1422.161836385727,
+ "compute": "torch 2.14.0+cpu on cpu (10 threads)",
+ "n_train_patches": 1800,
+ "synthetic_training_data": "true",
+ "loss": "MSE + 0.1 spectral + 0.5 pinball(q=0.99, top-1% pixels)"
+}

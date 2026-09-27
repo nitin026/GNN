@@ -3,9 +3,9 @@
 PY ?= .venv/Scripts/python
 export PYTHONIOENCODING=utf-8
 
-.PHONY: all research data-real data-synth validate baseline improvements gnn test verify
+.PHONY: all research data-real data-synth validate baseline improvements gnn downscale test verify
 
-all: research data-real data-synth validate baseline improvements gnn test verify
+all: research data-real data-synth validate baseline improvements gnn downscale test verify
 
 research:
 	$(PY) scripts/check_links.py --prune
@@ -34,6 +34,12 @@ gnn:
 	$(PY) scripts/train_tracker.py --variant cross
 	$(PY) scripts/train_tracker.py --variant none
 	$(PY) -m pipeline.gnn_eval
+
+downscale:
+	$(PY) scripts/package_training_data.py
+	$(PY) scripts/train_downscaler.py --model unet
+	$(PY) scripts/train_downscaler.py --model diffusion
+	$(PY) -m pipeline.downscale_eval
 
 test:
 	$(PY) -m pytest -q
