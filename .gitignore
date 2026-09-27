@@ -15,3 +15,5 @@ data/real/imd/raw/
 data/real/dem/raw/
 data/real/ibtracs/ibtracs.NI.list.v04r01.csv
 logs/
+bundle/
+training_bundle.zip

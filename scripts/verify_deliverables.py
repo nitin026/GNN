@@ -119,7 +119,7 @@ mk = (ROOT / "Makefile").read_text() if (ROOT / "Makefile").exists() else ""
 for t in ("research", "data-real", "data-synth", "validate", "baseline", "test", "all"):
     check(re.search(rf"^{t}:", mk, flags=re.M) is not None, f"Makefile target '{t}'")
 req = (ROOT / "requirements.txt").read_text().splitlines() if (ROOT / "requirements.txt").exists() else []
-check(req and all("==" in r for r in req if r.strip() and not r.startswith("#")),
+check(req and all("==" in r for r in req if r.strip() and not r.startswith(("#", "-"))),
       "requirements.txt fully pinned")
 tests = " ".join(p.read_text() for p in (ROOT / "tests").glob("test_*.py"))
 for name, pat in (("conservation avgpool", r"def test_case_files_conserve"),
