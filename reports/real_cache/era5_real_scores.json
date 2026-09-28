@@ -1,0 +1,345 @@
+{
+ "results": {
+  "amphan_2020": {
+   "v2": {
+    "matched_fixes": 23,
+    "ibtracs_fixes": 26,
+    "err_mean_km": 44.59491166186195,
+    "err_median_km": 27.939162486552153,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 25,
+    "ibtracs_fixes": 26,
+    "err_mean_km": 55.25208691706085,
+    "err_median_km": 29.690206765617656,
+    "n_tracks": 23
+   },
+   "gnn_full": {
+    "matched_fixes": 23,
+    "ibtracs_fixes": 26,
+    "err_mean_km": 44.59491166186195,
+    "err_median_km": 27.939162486552153,
+    "n_tracks": 1
+   },
+   "gnn_temporal": {
+    "matched_fixes": 22,
+    "ibtracs_fixes": 26,
+    "err_mean_km": 37.77165341849439,
+    "err_median_km": 27.843036547870447,
+    "n_tracks": 1
+   }
+  },
+  "fani_2019": {
+   "v2": {
+    "matched_fixes": 36,
+    "ibtracs_fixes": 36,
+    "err_mean_km": 50.023819585585315,
+    "err_median_km": 37.12185024205402,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 32,
+    "ibtracs_fixes": 36,
+    "err_mean_km": 42.997411226837286,
+    "err_median_km": 33.95766988262227,
+    "n_tracks": 18
+   },
+   "gnn_full": {
+    "matched_fixes": 31,
+    "ibtracs_fixes": 36,
+    "err_mean_km": 43.30052265489156,
+    "err_median_km": 34.271137403880886,
+    "n_tracks": 3
+   },
+   "gnn_temporal": {
+    "matched_fixes": 30,
+    "ibtracs_fixes": 36,
+    "err_mean_km": 43.60150216325858,
+    "err_median_km": 34.74360221640583,
+    "n_tracks": 2
+   }
+  },
+  "gulab_2021": {
+   "v2": {
+    "matched_fixes": 15,
+    "ibtracs_fixes": 43,
+    "err_mean_km": 38.11772240897027,
+    "err_median_km": 32.75346763216227,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 36,
+    "ibtracs_fixes": 43,
+    "err_mean_km": 48.90749794296582,
+    "err_median_km": 40.00227182071725,
+    "n_tracks": 22
+   },
+   "gnn_full": {
+    "matched_fixes": 5,
+    "ibtracs_fixes": 43,
+    "err_mean_km": 17.816316627061703,
+    "err_median_km": 16.474873275110422,
+    "n_tracks": 4
+   },
+   "gnn_temporal": {
+    "matched_fixes": 6,
+    "ibtracs_fixes": 43,
+    "err_mean_km": 57.29742031935339,
+    "err_median_km": 52.13321295585953,
+    "n_tracks": 1
+   }
+  },
+  "nisarga_2020": {
+   "v2": {
+    "matched_fixes": 10,
+    "ibtracs_fixes": 15,
+    "err_mean_km": 28.37192661449788,
+    "err_median_km": 20.484196210754504,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 13,
+    "ibtracs_fixes": 15,
+    "err_mean_km": 41.68355814904857,
+    "err_median_km": 39.67835074047315,
+    "n_tracks": 12
+   },
+   "gnn_full": {
+    "matched_fixes": 12,
+    "ibtracs_fixes": 15,
+    "err_mean_km": 32.29994893207063,
+    "err_median_km": 33.60249587676138,
+    "n_tracks": 1
+   },
+   "gnn_temporal": {
+    "matched_fixes": 12,
+    "ibtracs_fixes": 15,
+    "err_mean_km": 32.29994893207063,
+    "err_median_km": 33.60249587676138,
+    "n_tracks": 1
+   }
+  },
+  "nivar_2020": {
+   "v2": {
+    "matched_fixes": 16,
+    "ibtracs_fixes": 22,
+    "err_mean_km": 44.511324188695156,
+    "err_median_km": 37.69687850890976,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 20,
+    "ibtracs_fixes": 22,
+    "err_mean_km": 48.40839973326321,
+    "err_median_km": 52.37376073600562,
+    "n_tracks": 10
+   },
+   "gnn_full": {
+    "matched_fixes": 17,
+    "ibtracs_fixes": 22,
+    "err_mean_km": 45.05639690705967,
+    "err_median_km": 37.74572560883773,
+    "n_tracks": 4
+   },
+   "gnn_temporal": {
+    "matched_fixes": 17,
+    "ibtracs_fixes": 22,
+    "err_mean_km": 45.05639690705967,
+    "err_median_km": 37.74572560883773,
+    "n_tracks": 4
+   }
+  },
+  "tauktae_2021": {
+   "v2": {
+    "matched_fixes": 23,
+    "ibtracs_fixes": 25,
+    "err_mean_km": 40.330539124141694,
+    "err_median_km": 25.795222789582482,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 23,
+    "ibtracs_fixes": 25,
+    "err_mean_km": 40.330539124141694,
+    "err_median_km": 25.795222789582482,
+    "n_tracks": 15
+   },
+   "gnn_full": {
+    "matched_fixes": 23,
+    "ibtracs_fixes": 25,
+    "err_mean_km": 198.7726569995443,
+    "err_median_km": 29.435542049528173,
+    "n_tracks": 2
+   },
+   "gnn_temporal": {
+    "matched_fixes": 19,
+    "ibtracs_fixes": 25,
+    "err_mean_km": 35.97909462378114,
+    "err_median_km": 24.556327893912844,
+    "n_tracks": 3
+   }
+  },
+  "vayu_2019": {
+   "v2": {
+    "matched_fixes": 32,
+    "ibtracs_fixes": 39,
+    "err_mean_km": 37.08344156074921,
+    "err_median_km": 25.648206697154144,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 35,
+    "ibtracs_fixes": 39,
+    "err_mean_km": 37.17194026805481,
+    "err_median_km": 27.044321001695977,
+    "n_tracks": 21
+   },
+   "gnn_full": {
+    "matched_fixes": 33,
+    "ibtracs_fixes": 39,
+    "err_mean_km": 40.58250522750398,
+    "err_median_km": 26.56656144848034,
+    "n_tracks": 2
+   },
+   "gnn_temporal": {
+    "matched_fixes": 30,
+    "ibtracs_fixes": 39,
+    "err_mean_km": 35.6493569442325,
+    "err_median_km": 25.648206697154144,
+    "n_tracks": 1
+   }
+  },
+  "yaas_2021": {
+   "v2": {
+    "matched_fixes": 17,
+    "ibtracs_fixes": 20,
+    "err_mean_km": 46.537949645673415,
+    "err_median_km": 49.24176520544381,
+    "n_tracks": 1
+   },
+   "te_style": {
+    "matched_fixes": 19,
+    "ibtracs_fixes": 20,
+    "err_mean_km": 58.99319713365982,
+    "err_median_km": 51.10896890990899,
+    "n_tracks": 14
+   },
+   "gnn_full": {
+    "matched_fixes": 19,
+    "ibtracs_fixes": 20,
+    "err_mean_km": 59.45619606576457,
+    "err_median_km": 51.10896890990899,
+    "n_tracks": 3
+   },
+   "gnn_temporal": {
+    "matched_fixes": 16,
+    "ibtracs_fixes": 20,
+    "err_mean_km": 55.70889482905904,
+    "err_median_km": 51.31866090288085,
+    "n_tracks": 2
+   }
+  }
+ },
+ "heat_cold": {
+  "cold_2019": {
+   "hazard": "cold_wave",
+   "reference": "IMD criteria on ERA5 daily Tmax/Tmin, >= 2 days, >= 50000 km2",
+   "ref_peak_area_cells": 3581,
+   "methods": {
+    "v2": {
+     "steps": 108,
+     "ref_steps": 28,
+     "hits": 28,
+     "misses": 0,
+     "false_alarms": 26,
+     "pod": 1.0,
+     "far": 0.48148148148148145,
+     "csi": 0.5185185185185185,
+     "iou_mean": 0.3643178541815148,
+     "n_tracks": 3
+    },
+    "gnn_temporal": {
+     "steps": 108,
+     "ref_steps": 28,
+     "hits": 5,
+     "misses": 23,
+     "false_alarms": 40,
+     "pod": 0.17857142857142858,
+     "far": 0.8888888888888888,
+     "csi": 0.07352941176470588,
+     "iou_mean": 0.12587380987025948,
+     "n_tracks": 11
+    },
+    "te_style": {
+     "steps": 108,
+     "ref_steps": 28,
+     "hits": 28,
+     "misses": 0,
+     "false_alarms": 4,
+     "pod": 1.0,
+     "far": 0.125,
+     "csi": 0.875,
+     "iou_mean": 0.6470524664828815,
+     "n_tracks": 1
+    }
+   },
+   "imd_check": {
+    "status": "ok",
+    "cells_days": 13715,
+    "bias_era5_minus_imd_C": 0.3450773759130991,
+    "mae_C": 1.7756652388235934
+   }
+  },
+  "heat_2019": {
+   "hazard": "heat_dome",
+   "reference": "IMD criteria on ERA5 daily Tmax/Tmin, >= 2 days, >= 50000 km2",
+   "ref_peak_area_cells": 8460,
+   "methods": {
+    "v2": {
+     "steps": 88,
+     "ref_steps": 88,
+     "hits": 88,
+     "misses": 0,
+     "false_alarms": 0,
+     "pod": 1.0,
+     "far": 0.0,
+     "csi": 1.0,
+     "iou_mean": 0.6219407140612251,
+     "n_tracks": 4
+    },
+    "gnn_temporal": {
+     "steps": 88,
+     "ref_steps": 88,
+     "hits": 45,
+     "misses": 43,
+     "false_alarms": 0,
+     "pod": 0.5113636363636364,
+     "far": 0.0,
+     "csi": 0.5113636363636364,
+     "iou_mean": 0.2496566452940419,
+     "n_tracks": 5
+    },
+    "te_style": {
+     "steps": 88,
+     "ref_steps": 88,
+     "hits": 88,
+     "misses": 0,
+     "false_alarms": 0,
+     "pod": 1.0,
+     "far": 0.0,
+     "csi": 1.0,
+     "iou_mean": 0.8328501444432345,
+     "n_tracks": 8
+    }
+   },
+   "imd_check": {
+    "status": "ok",
+    "cells_days": 79461,
+    "bias_era5_minus_imd_C": -0.7190723807436424,
+    "mae_C": 1.4251402383522966
+   }
+  }
+ },
+ "peak_rss_mb": 1204.252672
+}

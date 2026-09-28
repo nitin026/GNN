@@ -1,0 +1,50 @@
+{
+ "init": "2020-05-08 00:00:00",
+ "members": 56,
+ "lead_step_h": 12,
+ "v2": {
+  "p_detect_any": 0.35714285714285715,
+  "per_lead": {
+   "240": {
+    "p_detect": 0.32142857142857145,
+    "n": 18,
+    "ens_mean_err_km": 367.4731428854663,
+    "median_member_err_km": 508.4632695089255
+   }
+  }
+ },
+ "te_style": {
+  "p_detect_any": 0.35714285714285715,
+  "per_lead": {
+   "240": {
+    "p_detect": 0.3392857142857143,
+    "n": 19,
+    "ens_mean_err_km": 390.1443865500983,
+    "median_member_err_km": 528.5480580594943
+   }
+  }
+ },
+ "gnn_full": {
+  "p_detect_any": 0.21428571428571427,
+  "per_lead": {
+   "240": {
+    "p_detect": 0.21428571428571427,
+    "n": 12,
+    "ens_mean_err_km": 460.1977886705211,
+    "median_member_err_km": 529.3870841910089
+   }
+  }
+ },
+ "gnn_temporal": {
+  "p_detect_any": 0.21428571428571427,
+  "per_lead": {
+   "240": {
+    "p_detect": 0.21428571428571427,
+    "n": 12,
+    "ens_mean_err_km": 460.1977886705211,
+    "median_member_err_km": 529.3870841910089
+   }
+  }
+ },
+ "peak_rss_mb": 1874.604032
+}

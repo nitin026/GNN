@@ -1,0 +1,48 @@
+{
+ "init": "2020-05-20 00:00:00",
+ "members": 56,
+ "lead_step_h": 12,
+ "v2": {
+  "p_detect_any": 0.0,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.0,
+    "n": 0
+   }
+  }
+ },
+ "te_style": {
+  "p_detect_any": 0.9821428571428571,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.9821428571428571,
+    "n": 55,
+    "ens_mean_err_km": 125.46570352849635,
+    "median_member_err_km": 126.59633902334677
+   }
+  }
+ },
+ "gnn_full": {
+  "p_detect_any": 0.875,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.875,
+    "n": 49,
+    "ens_mean_err_km": 125.33358869668324,
+    "median_member_err_km": 126.59633902334677
+   }
+  }
+ },
+ "gnn_temporal": {
+  "p_detect_any": 0.875,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.875,
+    "n": 49,
+    "ens_mean_err_km": 125.33358869668324,
+    "median_member_err_km": 126.59633902334677
+   }
+  }
+ },
+ "peak_rss_mb": 1874.604032
+}

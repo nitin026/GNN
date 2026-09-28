@@ -204,6 +204,36 @@ if dsr.exists():
     check(js["peak_rss_mb"] > 0, f"peak RSS recorded ({js['peak_rss_mb']:.0f} MB)")
     check("imd_perfect_model" in js, "IMD perfect-model real-data check present")
 
+# BRIEF4 Phase 1: real-data evaluation set
+sj = ROOT / "data/real/SPLITS.json"
+check(sj.exists(), "data/real/SPLITS.json exists")
+if sj.exists():
+    spl = json.loads(sj.read_text())
+    check(spl.get("locked") is True, "real split is locked")
+    check(all(e["split"] == ("REAL-VAL" if int(k.split("_")[-1]) <= 2021 else "REAL-TEST")
+              for k, e in spl["events"].items()), "real split is by time (<= 2021 VAL, >= 2022 TEST)")
+    missing = []
+    for k, e in spl["events"].items():
+        if not list(ROOT.glob(e["files"])):
+            missing.append(k)
+    check(not missing, f"ERA5 files present for every real event {missing if missing else ''}")
+    ncyc = sum(e["hazard"] == "tropical_cyclone" for e in spl["events"].values())
+    check(ncyc >= 5 and all((ROOT / "data/real/ibtracs/events" / f"{k}.csv").exists()
+                            for k, e in spl["events"].items() if e["hazard"] == "tropical_cyclone"),
+          f"{ncyc} real cyclones with IBTrACS best tracks")
+ens = list((ROOT / "data/real/ensembles").glob("*.nc"))
+check(len(ens) >= 1, f"at least one REAL ensemble forecast ({len(ens)} files)")
+for pth in ("pipeline/loaders.py", "docs/NEPS_G.md", "pipeline/real_eval.py", "reports/real_results.json",
+            "reports/real_cache/era5_real_scores.json"):
+    check((ROOT / pth).exists(), f"{pth} exists")
+rr = ROOT / "reports/REAL_RESULTS.md"
+check(rr.exists(), "reports/REAL_RESULTS.md exists")
+if rr.exists():
+    t = rr.read_text(encoding="utf-8")
+    for h in ("Track error by lead time", "P ≥ 0.5 first-flag lead time", "What did not work"):
+        check(h in t, f"REAL_RESULTS.md reports '{h}'")
+    check(all(f"| {L} h" in t or f" {L} h |" in t for L in (24, 48, 72, 120, 168, 240)), "track error at 24/48/72/120/168/240 h")
+
 # --------------------------------------------------------------------------- constraints
 section("Constraints")
 size = sum(p.stat().st_size for p in (ROOT / "data").rglob("*") if p.is_file()) / 1e9
@@ -223,6 +253,8 @@ try:
                          check=True).stdout
     for ph in range(1, 6):
         check(re.search(rf"^Phase {ph}\b", log, flags=re.M) is not None, f"git commit for Phase {ph}")
+    for ph in (0, 1):
+        check(re.search(rf"^BRIEF4 Phase {ph}\b", log, flags=re.M) is not None, f"git commit for BRIEF4 Phase {ph}")
     for ph in "ABCD":
         check(re.search(rf"^BRIEF3 Phase {ph}\b", log, flags=re.M) is not None, f"git commit for BRIEF3 Phase {ph}")
     for ph in (0, 1, 2, 3, 5, 6):

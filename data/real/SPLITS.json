@@ -1,0 +1,152 @@
+{
+ "locked": true,
+ "created": "2026-09-27T21:34:52.228277+00:00",
+ "rule": "events up to 2021 -> REAL-VAL; events from 2022 -> REAL-TEST (split by time)",
+ "note": "REAL-TEST is reserved for the final blind evaluation (BRIEF4 Phase 8). Nothing may be tuned on it.",
+ "events": {
+  "fani_2019": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "FANI",
+   "season": 2019,
+   "split": "REAL-VAL",
+   "files": "data/real/events/fani_2019_sfc_*.nc"
+  },
+  "vayu_2019": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "VAYU",
+   "season": 2019,
+   "split": "REAL-VAL",
+   "files": "data/real/events/vayu_2019_sfc_*.nc"
+  },
+  "amphan_2020": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "AMPHAN",
+   "season": 2020,
+   "split": "REAL-VAL",
+   "files": "data/real/era5/amphan_era5_*.nc"
+  },
+  "nisarga_2020": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "NISARGA",
+   "season": 2020,
+   "split": "REAL-VAL",
+   "files": "data/real/events/nisarga_2020_sfc_*.nc"
+  },
+  "nivar_2020": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "NIVAR",
+   "season": 2020,
+   "split": "REAL-VAL",
+   "files": "data/real/events/nivar_2020_sfc_*.nc"
+  },
+  "tauktae_2021": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "TAUKTAE",
+   "season": 2021,
+   "split": "REAL-VAL",
+   "files": "data/real/events/tauktae_2021_sfc_*.nc"
+  },
+  "yaas_2021": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "YAAS",
+   "season": 2021,
+   "split": "REAL-VAL",
+   "files": "data/real/events/yaas_2021_sfc_*.nc"
+  },
+  "gulab_2021": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "GULAB:SHAHEEN-GU",
+   "season": 2021,
+   "split": "REAL-VAL",
+   "files": "data/real/events/gulab_2021_sfc_*.nc"
+  },
+  "asani_2022": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "ASANI",
+   "season": 2022,
+   "split": "REAL-TEST",
+   "files": "data/real/events/asani_2022_sfc_*.nc"
+  },
+  "mocha_2023": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "MOCHA",
+   "season": 2023,
+   "split": "REAL-TEST",
+   "files": "data/real/events/mocha_2023_sfc_*.nc"
+  },
+  "biparjoy_2023": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "BIPARJOY",
+   "season": 2023,
+   "split": "REAL-TEST",
+   "files": "data/real/events/biparjoy_2023_sfc_*.nc"
+  },
+  "tej_2023": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "TEJ",
+   "season": 2023,
+   "split": "REAL-TEST",
+   "files": "data/real/events/tej_2023_sfc_*.nc"
+  },
+  "michaung_2023": {
+   "hazard": "tropical_cyclone",
+   "ibtracs_name": "MICHAUNG",
+   "season": 2023,
+   "split": "REAL-TEST",
+   "files": "data/real/events/michaung_2023_sfc_*.nc"
+  },
+  "heat_2019": {
+   "hazard": "heat_dome",
+   "start": "2019-05-25T00",
+   "end": "2019-06-15T18",
+   "split": "REAL-VAL",
+   "files": "data/real/events/heat_2019_sfc_*.nc"
+  },
+  "cold_2019": {
+   "hazard": "cold_wave",
+   "start": "2019-12-15T00",
+   "end": "2020-01-10T18",
+   "split": "REAL-VAL",
+   "files": "data/real/events/cold_2019_sfc_*.nc"
+  },
+  "heat_2022": {
+   "hazard": "heat_dome",
+   "start": "2022-04-15T00",
+   "end": "2022-05-10T18",
+   "split": "REAL-TEST",
+   "files": "data/real/events/heat_2022_sfc_*.nc"
+  },
+  "heat_2024": {
+   "hazard": "heat_dome",
+   "split": "REAL-TEST",
+   "files": "data/real/era5/heatwave_era5_*.nc"
+  },
+  "cold_2022": {
+   "hazard": "cold_wave",
+   "split": "REAL-TEST",
+   "files": "data/real/era5/coldwave_era5_*.nc"
+  }
+ },
+ "REAL-VAL": [
+  "amphan_2020",
+  "cold_2019",
+  "fani_2019",
+  "gulab_2021",
+  "heat_2019",
+  "nisarga_2020",
+  "nivar_2020",
+  "tauktae_2021",
+  "vayu_2019",
+  "yaas_2021"
+ ],
+ "REAL-TEST": [
+  "asani_2022",
+  "biparjoy_2023",
+  "cold_2022",
+  "heat_2022",
+  "heat_2024",
+  "michaung_2023",
+  "mocha_2023",
+  "tej_2023"
+ ]
+}

@@ -187,5 +187,266 @@
   "time_range": "static",
   "note": "rasterised to G12/G5 (cell centres inside the IND polygon); approximate IMD domain",
   "logged_at": "2026-09-27T15:50:23+00:00"
+ },
+ {
+  "source": "ERA5 event fani_2019",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 50.6,
+  "time_range": "2019-04-23 00:00:00 .. 2019-05-05 18:00:00",
+  "note": "sfc 6-hourly (52 steps) + 850 hPa daily 12 UTC (13); 0.25 + G12; 454s",
+  "logged_at": "2026-09-27T21:42:26+00:00"
+ },
+ {
+  "source": "ERA5 event vayu_2019",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 57.4,
+  "time_range": "2019-06-06 00:00:00 .. 2019-06-19 18:00:00",
+  "note": "sfc 6-hourly (56 steps) + 850 hPa daily 12 UTC (14); 0.25 + G12; 433s",
+  "logged_at": "2026-09-27T21:49:40+00:00"
+ },
+ {
+  "source": "ERA5 event nisarga_2020",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 32.8,
+  "time_range": "2020-05-29 00:00:00 .. 2020-06-05 18:00:00",
+  "note": "sfc 6-hourly (32 steps) + 850 hPa daily 12 UTC (8); 0.25 + G12; 267s",
+  "logged_at": "2026-09-27T21:54:08+00:00"
+ },
+ {
+  "source": "ERA5 event nivar_2020",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 35.0,
+  "time_range": "2020-11-20 00:00:00 .. 2020-11-28 18:00:00",
+  "note": "sfc 6-hourly (36 steps) + 850 hPa daily 12 UTC (9); 0.25 + G12; 296s",
+  "logged_at": "2026-09-27T21:59:05+00:00"
+ },
+ {
+  "source": "ERA5 event tauktae_2021",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 40.7,
+  "time_range": "2021-05-11 00:00:00 .. 2021-05-20 18:00:00",
+  "note": "sfc 6-hourly (40 steps) + 850 hPa daily 12 UTC (10); 0.25 + G12; 327s",
+  "logged_at": "2026-09-27T22:04:33+00:00"
+ },
+ {
+  "source": "ERA5 event yaas_2021",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 32.3,
+  "time_range": "2021-05-21 00:00:00 .. 2021-05-28 18:00:00",
+  "note": "sfc 6-hourly (32 steps) + 850 hPa daily 12 UTC (8); 0.25 + G12; 275s",
+  "logged_at": "2026-09-27T22:09:09+00:00"
+ },
+ {
+  "source": "ERA5 event gulab_2021",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 61.0,
+  "time_range": "2021-09-21 00:00:00 .. 2021-10-05 18:00:00",
+  "note": "sfc 6-hourly (60 steps) + 850 hPa daily 12 UTC (15); 0.25 + G12; 494s",
+  "logged_at": "2026-09-27T22:17:24+00:00"
+ },
+ {
+  "source": "ERA5 climatology extra doy (mean+std)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5-hourly-climatology/1990-2019_6h_1440x721.zarr",
+  "status": "OK",
+  "size_mb": 126.7,
+  "time_range": "85 extra day-of-year values",
+  "note": "2770s; 0.25 deg only (G12 on demand)",
+  "logged_at": "2026-09-27T22:21:57+00:00"
+ },
+ {
+  "source": "ERA5 event asani_2022",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 48.1,
+  "time_range": "2022-05-03 00:00:00 .. 2022-05-14 18:00:00",
+  "note": "sfc 6-hourly (48 steps) + 850 hPa daily 12 UTC (12); 0.25 + G12; 391s",
+  "logged_at": "2026-09-27T22:23:56+00:00"
+ },
+ {
+  "source": "REAL ensemble ifs_ens_1p5 (Amphan 2020)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/ifs_ens/2018-2022-240x121_equiangular_with_poles_conservative.zarr",
+  "status": "OK",
+  "size_mb": 72.0,
+  "time_range": "13 inits 2020-05-08..20 00 UTC",
+  "note": "India box; direct chunk reads; peak RSS 377 MB",
+  "logged_at": "2026-09-27T22:28:05+00:00"
+ },
+ {
+  "source": "REAL ensemble gencast_1p5 (Amphan 2020)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/gencast/2020-240x121_equiangular_with_poles_conservative.zarr",
+  "status": "OK",
+  "size_mb": 23.2,
+  "time_range": "13 inits 2020-05-08..20 00 UTC",
+  "note": "India box; direct chunk reads; peak RSS 377 MB",
+  "logged_at": "2026-09-27T22:28:05+00:00"
+ },
+ {
+  "source": "REAL ensemble ifs_ens_0p25 (Amphan 2020)",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/ifs_ens/2018-2022-1440x721.zarr",
+  "status": "OK",
+  "size_mb": 50.9,
+  "time_range": "1 inits 2020-05-08..20 00 UTC",
+  "note": "India box; direct chunk reads; peak RSS 377 MB",
+  "logged_at": "2026-09-27T22:28:05+00:00"
+ },
+ {
+  "source": "ERA5 event mocha_2023",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 43.7,
+  "time_range": "2023-05-06 00:00:00 .. 2023-05-16 18:00:00",
+  "note": "sfc 6-hourly (44 steps) + 850 hPa daily 12 UTC (11); 0.25 + G12; 613s",
+  "logged_at": "2026-09-27T22:34:11+00:00"
+ },
+ {
+  "source": "ERA5 event biparjoy_2023",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 72.5,
+  "time_range": "2023-06-03 00:00:00 .. 2023-06-20 18:00:00",
+  "note": "sfc 6-hourly (72 steps) + 850 hPa daily 12 UTC (18); 0.25 + G12; 952s",
+  "logged_at": "2026-09-27T22:51:16+00:00"
+ },
+ {
+  "source": "ERA5 event tej_2023",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 35.6,
+  "time_range": "2023-10-17 00:00:00 .. 2023-10-25 18:00:00",
+  "note": "sfc 6-hourly (36 steps) + 850 hPa daily 12 UTC (9); 0.25 + G12; 587s",
+  "logged_at": "2026-09-27T23:01:54+00:00"
+ },
+ {
+  "source": "ERA5 event michaung_2023",
+  "url": "WB2/ARCO",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ClientConnectorDNSError: Cannot connect to host storage.googleapis.com:443 ssl:default [getaddrinfo failed]",
+  "logged_at": "2026-09-27T23:05:36+00:00"
+ },
+ {
+  "source": "ERA5 event cold_2019",
+  "url": "WB2/ARCO",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ClientConnectorDNSError: Cannot connect to host storage.googleapis.com:443 ssl:default [getaddrinfo failed]",
+  "logged_at": "2026-09-27T23:05:36+00:00"
+ },
+ {
+  "source": "ERA5 event heat_2022",
+  "url": "WB2/ARCO",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ClientConnectorDNSError: Cannot connect to host storage.googleapis.com:443 ssl:default [getaddrinfo failed]",
+  "logged_at": "2026-09-27T23:05:36+00:00"
+ },
+ {
+  "source": "IMD tmax 2019 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ConnectionError: HTTPSConnectionPool(host='imdpune.gov.in', port=443): Max retries exceeded with url: /cmpg/Griddata/maxtemp.php (Caused  (2 attempts); heat/cold truth falls back to ERA5 Tmax/Tmin with IMD criteria",
+  "logged_at": "2026-09-27T23:05:47+00:00"
+ },
+ {
+  "source": "ERA5 event michaung_2023",
+  "url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+  "status": "OK",
+  "size_mb": 39.6,
+  "time_range": "2023-11-28 00:00:00 .. 2023-12-07 18:00:00",
+  "note": "sfc 6-hourly (40 steps) + 850 hPa daily 12 UTC (10); 0.25 + G12; 597s",
+  "logged_at": "2026-09-27T23:21:04+00:00"
+ },
+ {
+  "source": "ERA5 event heat_2019",
+  "url": "WB2/ARCO",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "ClientConnectorDNSError: Cannot connect to host storage.googleapis.com:443 ssl:default [getaddrinfo failed]",
+  "logged_at": "2026-09-27T23:22:19+00:00"
+ },
+ {
+  "source": "ERA5 event heat_2019",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 89.0,
+  "time_range": "2019-05-25 00:00:00 .. 2019-06-15 18:00:00",
+  "note": "sfc 6-hourly (88 steps) + 850 hPa daily 12 UTC (22); 0.25 + G12; 726s",
+  "logged_at": "2026-09-28T10:11:01+00:00"
+ },
+ {
+  "source": "ERA5 event cold_2019",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 104.1,
+  "time_range": "2019-12-15 00:00:00 .. 2020-01-10 18:00:00",
+  "note": "sfc 6-hourly (108 steps) + 850 hPa daily 12 UTC (27); 0.25 + G12; 1104s",
+  "logged_at": "2026-09-28T10:29:25+00:00"
+ },
+ {
+  "source": "ERA5 event heat_2022",
+  "url": "https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr",
+  "status": "OK",
+  "size_mb": 101.9,
+  "time_range": "2022-04-15 00:00:00 .. 2022-05-10 18:00:00",
+  "note": "sfc 6-hourly (104 steps) + 850 hPa daily 12 UTC (26); 0.25 + G12; 1011s",
+  "logged_at": "2026-09-28T10:46:18+00:00"
+ },
+ {
+  "source": "IMD tmax 2020 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "FAILED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "imdlib download hung > 20 min (no server response, no timeout in imdlib); stopped; not needed for REAL-VAL (heat_2019 uses tmax 2019)",
+  "logged_at": "2026-09-28T11:08:27+00:00"
+ },
+ {
+  "source": "IMD tmax 2019 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "OK",
+  "size_mb": 1.4,
+  "time_range": "2019",
+  "note": "IMD 1 deg gridded daily temperature; independent check of ERA5 Tmax/Tmin in REAL heat/cold events",
+  "logged_at": "2026-09-28T11:08:27+00:00"
+ },
+ {
+  "source": "IMD tmin 2019 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "OK",
+  "size_mb": 1.4,
+  "time_range": "2019",
+  "note": "IMD 1 deg gridded daily temperature; independent check of ERA5 Tmax/Tmin in REAL heat/cold events",
+  "logged_at": "2026-09-28T11:08:27+00:00"
+ },
+ {
+  "source": "IMD tmin 2020 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "OK",
+  "size_mb": 1.4,
+  "time_range": "2020",
+  "note": "IMD 1 deg gridded daily temperature; independent check of ERA5 Tmax/Tmin in REAL heat/cold events",
+  "logged_at": "2026-09-28T11:08:27+00:00"
+ },
+ {
+  "source": "IMD tmax/tmin 2022, 2024 1 deg",
+  "url": "https://imdpune.gov.in (imdlib)",
+  "status": "SKIPPED",
+  "size_mb": null,
+  "time_range": "",
+  "note": "not attempted after the 2020 hang; needed only for REAL-TEST events (BRIEF4 Phase 8), where the ERA5 IMD-criteria reference is used",
+  "logged_at": "2026-09-28T11:08:27+00:00"
  }
 ]

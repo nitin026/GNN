@@ -1,0 +1,98 @@
+{
+ "init": "2020-05-11 00:00:00",
+ "members": 50,
+ "lead_step_h": 6,
+ "v2": {
+  "p_detect_any": 0.74,
+  "per_lead": {
+   "120": {
+    "p_detect": 0.4,
+    "n": 20,
+    "ens_mean_err_km": 220.61073446280452,
+    "median_member_err_km": 257.78704133191565
+   },
+   "168": {
+    "p_detect": 0.66,
+    "n": 33,
+    "ens_mean_err_km": 207.3044325834826,
+    "median_member_err_km": 468.62192950439555
+   },
+   "240": {
+    "p_detect": 0.5,
+    "n": 25,
+    "ens_mean_err_km": 314.52450954461375,
+    "median_member_err_km": 422.3037686671907
+   }
+  }
+ },
+ "te_style": {
+  "p_detect_any": 0.78,
+  "per_lead": {
+   "120": {
+    "p_detect": 0.46,
+    "n": 23,
+    "ens_mean_err_km": 241.75492839366296,
+    "median_member_err_km": 269.8251126590103
+   },
+   "168": {
+    "p_detect": 0.72,
+    "n": 36,
+    "ens_mean_err_km": 224.14073901119608,
+    "median_member_err_km": 509.28726059144793
+   },
+   "240": {
+    "p_detect": 0.58,
+    "n": 29,
+    "ens_mean_err_km": 387.3751760837693,
+    "median_member_err_km": 629.8212829995882
+   }
+  }
+ },
+ "gnn_full": {
+  "p_detect_any": 0.56,
+  "per_lead": {
+   "120": {
+    "p_detect": 0.26,
+    "n": 13,
+    "ens_mean_err_km": 264.81180779321824,
+    "median_member_err_km": 269.8251126590103
+   },
+   "168": {
+    "p_detect": 0.46,
+    "n": 23,
+    "ens_mean_err_km": 263.95363014252155,
+    "median_member_err_km": 498.7418163727209
+   },
+   "240": {
+    "p_detect": 0.16,
+    "n": 8,
+    "ens_mean_err_km": 549.0774054988096,
+    "median_member_err_km": 604.0625532835269
+   }
+  }
+ },
+ "gnn_temporal": {
+  "p_detect_any": 0.56,
+  "per_lead": {
+   "120": {
+    "p_detect": 0.18,
+    "n": 9,
+    "ens_mean_err_km": 304.9525815479961,
+    "median_member_err_km": 269.8251126590103
+   },
+   "168": {
+    "p_detect": 0.4,
+    "n": 20,
+    "ens_mean_err_km": 314.3170762215105,
+    "median_member_err_km": 469.1750468244458
+   },
+   "240": {
+    "p_detect": 0.18,
+    "n": 9,
+    "ens_mean_err_km": 570.5480109543955,
+    "median_member_err_km": 629.8212829995882
+   }
+  }
+ },
+ "peak_rss_mb": 3216.887808
+}

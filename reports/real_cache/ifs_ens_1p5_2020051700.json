@@ -1,0 +1,98 @@
+{
+ "init": "2020-05-17 00:00:00",
+ "members": 50,
+ "lead_step_h": 6,
+ "v2": {
+  "p_detect_any": 1.0,
+  "per_lead": {
+   "24": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 72.75974479833536,
+    "median_member_err_km": 102.9266589475295
+   },
+   "48": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 70.74773225266625,
+    "median_member_err_km": 151.79053226634258
+   },
+   "72": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 56.446316253854036,
+    "median_member_err_km": 145.92688070513663
+   }
+  }
+ },
+ "te_style": {
+  "p_detect_any": 1.0,
+  "per_lead": {
+   "24": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 72.75974479833536,
+    "median_member_err_km": 102.9266589475295
+   },
+   "48": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 70.74773225266625,
+    "median_member_err_km": 151.79053226634258
+   },
+   "72": {
+    "p_detect": 1.0,
+    "n": 50,
+    "ens_mean_err_km": 56.446316253854036,
+    "median_member_err_km": 145.92688070513663
+   }
+  }
+ },
+ "gnn_full": {
+  "p_detect_any": 1.0,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.94,
+    "n": 47,
+    "ens_mean_err_km": 73.88565517790843,
+    "median_member_err_km": 102.9266589475295
+   },
+   "48": {
+    "p_detect": 0.94,
+    "n": 47,
+    "ens_mean_err_km": 75.88143916310565,
+    "median_member_err_km": 151.79053226634258
+   },
+   "72": {
+    "p_detect": 0.94,
+    "n": 47,
+    "ens_mean_err_km": 64.09757887597031,
+    "median_member_err_km": 152.03155241045462
+   }
+  }
+ },
+ "gnn_temporal": {
+  "p_detect_any": 1.0,
+  "per_lead": {
+   "24": {
+    "p_detect": 0.96,
+    "n": 48,
+    "ens_mean_err_km": 71.52420995667033,
+    "median_member_err_km": 102.9266589475295
+   },
+   "48": {
+    "p_detect": 0.96,
+    "n": 48,
+    "ens_mean_err_km": 74.12888440957938,
+    "median_member_err_km": 151.79053226634258
+   },
+   "72": {
+    "p_detect": 0.96,
+    "n": 48,
+    "ens_mean_err_km": 60.47561281209512,
+    "median_member_err_km": 145.92688070513663
+   }
+  }
+ },
+ "peak_rss_mb": 3216.887808
+}
