@@ -161,6 +161,30 @@ if (ROOT / "docs/PITCH.md").exists():
     n = len(re.findall(r"^## \d+\.", (ROOT / "docs/PITCH.md").read_text(encoding="utf-8"), flags=re.M))
     check(n >= 10, f"docs/PITCH.md has {n} slides (>= 10)")
 
+# --------------------------------------------------------------------------- BRIEF3
+section("BRIEF3")
+for pth in ("backend/api/app.py", "backend/api/store.py", "backend/api/jobs.py", "docs/API.md", "docs/openapi.json",
+            "docs/ALERT_RULES.md", "tests/test_api.py", "tests/test_alert_rules.py", "scripts/build_districts.py",
+            "backend/static/districts.json", "frontend/package.json", "frontend/src/App.tsx",
+            "frontend/src/views/Operations.tsx", "frontend/src/views/Downscaling.tsx", "frontend/src/views/Alerts.tsx",
+            "frontend/src/views/Performance.tsx", "frontend/src/test/app.test.tsx", "frontend/e2e/smoke.spec.ts",
+            "reports/SYSTEM_PERF.md", "README.md"):
+    check((ROOT / pth).exists(), f"{pth} exists")
+for c in ("amphan_replay", "cyc_04", "heat_04", "cold_04", "amphan_era5_real"):
+    check((ROOT / "backend/products" / c / "alert_grid.npz").exists(), f"alert_grid.npz for demo case {c}")
+if (ROOT / "docs/openapi.json").exists():
+    paths = set(json.loads((ROOT / "docs/openapi.json").read_text())["paths"])
+    need = {"/health", "/cases", "/cases/{case}/tracks", "/cases/{case}/bbox4d", "/cases/{case}/fields/{var}",
+            "/alerts", "/alerts/districts", "/run", "/run/{job_id}"}
+    check(need <= paths, f"OpenAPI has all BRIEF3 endpoints (missing {sorted(need - paths)})")
+sp = ROOT / "reports/system_perf.json"
+if sp.exists():
+    js = json.loads(sp.read_text())
+    check(js["end_to_end"] and js["end_to_end"]["status"] == "done", "end-to-end POST /run job measured")
+    check(all("p95_ms" in r for r in js["api_latency"]), f"API p95 latency measured ({len(js['api_latency'])} endpoints)")
+for f in ("ui_operations", "ui_downscaling", "ui_alerts", "ui_performance"):
+    check((ROOT / "docs/figures" / f"{f}.png").exists(), f"screenshot docs/figures/{f}.png")
+
 # --------------------------------------------------------------------------- BRIEF4
 section("BRIEF4")
 check((ROOT / "reports/TUNING_LOG.md").exists(), "reports/TUNING_LOG.md exists")
@@ -199,6 +223,8 @@ try:
                          check=True).stdout
     for ph in range(1, 6):
         check(re.search(rf"^Phase {ph}\b", log, flags=re.M) is not None, f"git commit for Phase {ph}")
+    for ph in "ABCD":
+        check(re.search(rf"^BRIEF3 Phase {ph}\b", log, flags=re.M) is not None, f"git commit for BRIEF3 Phase {ph}")
     for ph in (0, 1, 2, 3, 5, 6):
         check(re.search(rf"^BRIEF2 Phase {ph}\b", log, flags=re.M) is not None,
               f"git commit for BRIEF2 Phase {ph}")

@@ -82,3 +82,18 @@ every deliverable.
 4. Make the synthetic data more realistic: dynamical small scales (e.g. from a km-scale model), rain
    maxima calibrated to IMD, vertical structure for heat domes, and ensemble perturbations taken from
    real NEPS-G spread.
+
+---
+
+## Update: BRIEF2 Phases 5–6 and BRIEF3 (API + dashboard), 2026-09-28
+- **Demo.** `python scripts/demo.py --case amphan` runs one timed CPU forecast cycle. For 20 members ×
+  41 leads it takes **122 s**, with a peak RSS of 5.8 GB. It then starts the API and the React
+  dashboard.
+- **REST API** (`backend/api`, FastAPI): cases, tracks, 4-D boxes, field PNGs, point alerts, a
+  district roll-up (GADM level 2) and async `POST /run`. Worst GET endpoint p95 is **60 ms**; a
+  full `POST /run` pipeline job takes **94 s** (`reports/SYSTEM_PERF.md`).
+- **Dashboard** (`frontend/`, React + MapLibre + deck.gl): Operations, Downscaling, Alerts and
+  Model-performance views, with an offline demo mode. Vitest and Playwright (system Edge) smoke
+  tests pass.
+- Results table: `reports/RESULTS.md`. Pitch outline: `docs/PITCH.md`. The later sections of this
+  file are rewritten at the end of BRIEF4.

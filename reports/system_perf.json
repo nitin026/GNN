@@ -1,0 +1,210 @@
+{
+ "measured_at": "2026-09-28T15:25:41",
+ "machine": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel (Windows), CPU only, no GPU",
+ "api_latency": [
+  {
+   "endpoint": "GET /health",
+   "path": "/health",
+   "n": 40,
+   "p50_ms": 1.1,
+   "p95_ms": 1.3,
+   "max_ms": 1.5,
+   "bytes": 120
+  },
+  {
+   "endpoint": "GET /cases",
+   "path": "/cases",
+   "n": 40,
+   "p50_ms": 1.2,
+   "p95_ms": 1.4,
+   "max_ms": 1.8,
+   "bytes": 3818
+  },
+  {
+   "endpoint": "GET /cases/{id}",
+   "path": "/cases/amphan_replay",
+   "n": 40,
+   "p50_ms": 2.0,
+   "p95_ms": 2.3,
+   "max_ms": 2.3,
+   "bytes": 14952
+  },
+  {
+   "endpoint": "GET /cases/{id}/tracks?lead=96",
+   "path": "/cases/amphan_replay/tracks?lead=96",
+   "n": 40,
+   "p50_ms": 3.8,
+   "p95_ms": 5.2,
+   "max_ms": 19.9,
+   "bytes": 16518
+  },
+  {
+   "endpoint": "GET /cases/{id}/bbox4d",
+   "path": "/cases/amphan_replay/bbox4d",
+   "n": 40,
+   "p50_ms": 1.1,
+   "p95_ms": 1.7,
+   "max_ms": 6.2,
+   "bytes": 627
+  },
+  {
+   "endpoint": "GET /cases/{id}/fields/wind (PNG 12 km)",
+   "path": "/cases/amphan_replay/fields/wind?res=12km&lead=96",
+   "n": 40,
+   "p50_ms": 1.6,
+   "p95_ms": 3.2,
+   "max_ms": 4.2,
+   "bytes": 51830
+  },
+  {
+   "endpoint": "GET /cases/{id}/fields/wind (PNG 5 km)",
+   "path": "/cases/amphan_replay/fields/wind?res=5km&lead=96",
+   "n": 40,
+   "p50_ms": 2.6,
+   "p95_ms": 3.6,
+   "max_ms": 4.5,
+   "bytes": 263746
+  },
+  {
+   "endpoint": "GET /alerts?case&lead",
+   "path": "/alerts?case=amphan_replay&lead=96",
+   "n": 40,
+   "p50_ms": 1.5,
+   "p95_ms": 1.6,
+   "max_ms": 2.1,
+   "bytes": 2488
+  },
+  {
+   "endpoint": "GET /alerts?lat&lon (point query)",
+   "path": "/alerts?case=amphan_replay&lat=15.5&lon=87.5",
+   "n": 40,
+   "p50_ms": 3.2,
+   "p95_ms": 4.0,
+   "max_ms": 4.2,
+   "bytes": 21630
+  },
+  {
+   "endpoint": "GET /alerts (all cases)",
+   "path": "/alerts?limit=100",
+   "n": 40,
+   "p50_ms": 12.2,
+   "p95_ms": 15.8,
+   "max_ms": 31.4,
+   "bytes": 119742
+  },
+  {
+   "endpoint": "GET /alerts/districts?lead",
+   "path": "/alerts/districts?case=amphan_replay&lead=96",
+   "n": 40,
+   "p50_ms": 2.6,
+   "p95_ms": 3.3,
+   "max_ms": 3.5,
+   "bytes": 246
+  },
+  {
+   "endpoint": "GET /alerts/districts (all leads)",
+   "path": "/alerts/districts?case=amphan_replay",
+   "n": 40,
+   "p50_ms": 52.7,
+   "p95_ms": 60.3,
+   "max_ms": 63.2,
+   "bytes": 25517
+  }
+ ],
+ "end_to_end": {
+  "case": "cyc_04",
+  "status": "done",
+  "error": null,
+  "stages": [
+   {
+    "stage": "setup",
+    "seconds": 0.89
+   },
+   {
+    "stage": "load",
+    "seconds": 10.28
+   },
+   {
+    "stage": "load",
+    "seconds": 0.08
+   },
+   {
+    "stage": "candidate graph",
+    "seconds": 23.2
+   },
+   {
+    "stage": "GNN tracking",
+    "seconds": 2.52
+   },
+   {
+    "stage": "downscaling + images",
+    "seconds": 44.8
+   },
+   {
+    "stage": "alerts",
+    "seconds": 9.6
+   }
+  ],
+  "job_seconds": 94.11,
+  "wall_seconds": 94.7,
+  "products_mb": 27.5,
+  "result": {
+   "case": "perf_e2e_cyc_04",
+   "alerts": 159,
+   "severe_alerts": 0
+  }
+ },
+ "demo_cycle": {
+  "amphan_replay": {
+   "case": "amphan_replay",
+   "synthetic": true,
+   "hazard": "tropical_cyclone",
+   "members": 20,
+   "leads": 41,
+   "graph": "built",
+   "nodes": 4168,
+   "edges": 23722,
+   "tracks": 43,
+   "alerts": 75,
+   "severe_alerts": 13,
+   "max_z": 68.12554168701172,
+   "max_efi": 1.0,
+   "stages": [
+    {
+     "stage": "setup: climatology, DEM, masks, models",
+     "seconds": 1.82
+    },
+    {
+     "stage": "1 load 12 km ensemble NetCDF",
+     "seconds": 14.84
+    },
+    {
+     "stage": "2 z-score anomaly + EFI (all leads)",
+     "seconds": 15.76
+    },
+    {
+     "stage": "3 candidate objects + graph",
+     "seconds": 37.59
+    },
+    {
+     "stage": "4 GNN inference + track decoding",
+     "seconds": 0.76
+    },
+    {
+     "stage": "5 U-Net downscaling 12->5 km (member 0, 41 leads)",
+     "seconds": 37.16
+    },
+    {
+     "stage": "6 alerts (ensemble probability x IMD thresholds)",
+     "seconds": 14.02
+    }
+   ],
+   "total_seconds": 121.97,
+   "peak_rss_mb": 5844.9,
+   "machine": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel (Windows), CPU only",
+   "tracker": "GNN full",
+   "downscaler": "U-Net + exact conservation projection",
+   "measured_at": "2026-09-28T12:23:45"
+  }
+ }
+}
