@@ -455,8 +455,9 @@ def export_case(case, clim, ds, india, reg, dec, c=None, out_root=OUT, stage=Non
     stage = stage or (lambda name: None)
     t0 = time.time()
     fresh = c is not None
-    stage("load")
-    c = c if fresh else load(case)
+    if not fresh:
+        stage("load")
+        c = load(case)
     out = out_root / case
     out.mkdir(parents=True, exist_ok=True)
     M = c["ens"]["msl"].shape[0]

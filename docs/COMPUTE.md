@@ -49,3 +49,16 @@ the previous session and may do so again after an update.
 
 The real test is Amphan ERA5 vs IBTrACS. The training set is small (6 cases). Later phases may add
 more synthetic training cases (`gen_*`, train only) with the existing generator.
+
+## BRIEF3: API and dashboard stack (2026-09-28)
+- `pip install fastapi uvicorn httpx` installed fastapi 0.141.1 and pydantic-core 2.46.5. Application
+  Control did **not** block pydantic-core, so the API uses **FastAPI + uvicorn**, not the Flask or
+  stdlib fallback.
+- Frontend: Node 24 / npm 11. React 18, Vite 5, TypeScript 5, MapLibre GL 4 and deck.gl 9 all
+  installed.
+  - npm's allow-scripts policy skipped esbuild's postinstall script, but the platform binary
+    (`@esbuild/win32-x64`) was installed and works.
+- End-to-end tests use Playwright with the **system Microsoft Edge** (`channel: "msedge"`), so no
+  browser download is needed. WebGL runs through SwiftShader in headless mode.
+- Basemap: Carto's free raster tiles now return "API key required", so the dashboard uses
+  OpenStreetMap raster tiles instead (attribution shown).

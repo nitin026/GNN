@@ -1,0 +1,713 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "SIH 26078 extreme-weather alerting API",
+  "description": "Ensemble anomaly tracking (GNN), 12->5 km downscaling and IMD-threshold alerts. SYNTHETIC cases are flagged in every response.",
+  "version": "1.0.0"
+ },
+ "paths": {
+  "/health": {
+   "get": {
+    "tags": [
+     "meta"
+    ],
+    "summary": "Health",
+    "operationId": "health_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cases": {
+   "get": {
+    "tags": [
+     "cases"
+    ],
+    "summary": "Cases",
+    "description": "All cases with hazard, synthetic flag, badge and date range.",
+    "operationId": "cases_cases_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cases/{case}": {
+   "get": {
+    "tags": [
+     "cases"
+    ],
+    "summary": "Case Meta",
+    "description": "Full meta.json: times, bounds, legends (units), 4-D boxes, metrics copied from reports/*.json.",
+    "operationId": "case_meta_cases__case__get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cases/{case}/tracks": {
+   "get": {
+    "tags": [
+     "cases"
+    ],
+    "summary": "Tracks",
+    "description": "GeoJSON: member tracks, consensus track (with spread) and 4-D boxes. With `lead`, tracks are\ncut at that lead, current positions are added as Points and boxes get `active`.",
+    "operationId": "tracks_cases__case__tracks_get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case"
+      }
+     },
+     {
+      "name": "lead",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 360,
+         "minimum": 0
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "lead time (h)",
+       "title": "Lead"
+      },
+      "description": "lead time (h)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cases/{case}/bbox4d": {
+   "get": {
+    "tags": [
+     "cases"
+    ],
+    "summary": "Bbox4D",
+    "description": "4-D bounding boxes (lat, lon, level, time) of the tracked event (GNN consensus).",
+    "operationId": "bbox4d_cases__case__bbox4d_get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cases/{case}/fields/{var}": {
+   "get": {
+    "tags": [
+     "cases"
+    ],
+    "summary": "Field",
+    "description": "A field as a paletted PNG (north up, `bounds` = [lon_min, lat_min, lon_max, lat_max] cell\nedges), or with format=json its URL, bounds and legend. var: t2m, wind, msl, tp, anom (12 km\nonly) or strike (strike probability). 5 km fields exist every 12 h.",
+    "operationId": "field_cases__case__fields__var__get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case"
+      }
+     },
+     {
+      "name": "var",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Var"
+      }
+     },
+     {
+      "name": "res",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "12km",
+        "5km"
+       ],
+       "type": "string",
+       "default": "12km",
+       "title": "Res"
+      }
+     },
+     {
+      "name": "lead",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 360,
+       "minimum": 0,
+       "default": 0,
+       "title": "Lead"
+      }
+     },
+     {
+      "name": "format",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "png",
+        "json"
+       ],
+       "type": "string",
+       "default": "png",
+       "title": "Format"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/alerts": {
+   "get": {
+    "tags": [
+     "alerts"
+    ],
+    "summary": "Alerts",
+    "description": "Alerts, most severe first. With lat+lon: only alerts whose 12 km alert region covers that point,\nwith the distance to the alert's pinpoint. Each alert has the pinpoint core coordinate (5 km grid),\ncategory low/moderate/severe, a 5 km impact-radius polygon, valid time, ensemble probability and\nthe reason, e.g. \"P(wind >= 118 km/h) = 0.72 within 50 km\".",
+    "operationId": "alerts_alerts_get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Case"
+      }
+     },
+     {
+      "name": "lead",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 360,
+         "minimum": 0
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lead"
+      }
+     },
+     {
+      "name": "lat",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number",
+         "maximum": 90,
+         "minimum": -90
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lat"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number",
+         "maximum": 180,
+         "minimum": -180
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lon"
+      }
+     },
+     {
+      "name": "min_category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "low",
+        "moderate",
+        "severe"
+       ],
+       "type": "string",
+       "default": "low",
+       "title": "Min Category"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 5000,
+       "minimum": 1,
+       "default": 500,
+       "title": "Limit"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/alerts/districts": {
+   "get": {
+    "tags": [
+     "alerts"
+    ],
+    "summary": "Districts",
+    "description": "District roll-up (GADM 4.1 level-2 districts rasterised to the 12 km grid): the highest\ncategory per district and hazard kind, its probability, and the fraction of the district\ncovered. Without `lead`, all leads are aggregated and first/last warned leads are given.",
+    "operationId": "districts_alerts_districts_get",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case"
+      }
+     },
+     {
+      "name": "lead",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 360,
+         "minimum": 0
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lead"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/reports/{name}": {
+   "get": {
+    "tags": [
+     "meta"
+    ],
+    "summary": "Report",
+    "description": "A pipeline results file from reports/ (JSON only), e.g. gnn_results.json,\ndownscaling_results.json, demo_timing.json. These feed the model-performance view.",
+    "operationId": "report_reports__name__get",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Name"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/run": {
+   "post": {
+    "tags": [
+     "run"
+    ],
+    "summary": "Run",
+    "description": "Run the pipeline asynchronously. Either select an existing case (`?case=cyc_04`) or upload a\n12 km ensemble NetCDF as the raw request body (`Content-Type: application/x-netcdf`, with\n`?hazard=`). Returns a job id; poll GET /run/{job_id}. Stage times are logged.",
+    "operationId": "run_run_post",
+    "parameters": [
+     {
+      "name": "case",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Case"
+      }
+     },
+     {
+      "name": "hazard",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "tropical_cyclone",
+          "heat_dome",
+          "cold_wave"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Hazard"
+      }
+     },
+     {
+      "name": "name",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "pattern": "^[A-Za-z0-9_-]{1,40}$"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Name"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/run/{job_id}": {
+   "get": {
+    "tags": [
+     "run"
+    ],
+    "summary": "Run Status",
+    "operationId": "run_status_run__job_id__get",
+    "parameters": [
+     {
+      "name": "job_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Job Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/runs": {
+   "get": {
+    "tags": [
+     "run"
+    ],
+    "summary": "Runs",
+    "operationId": "runs_runs_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  }
+ }
+}
