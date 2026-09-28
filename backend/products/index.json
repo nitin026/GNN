@@ -6,7 +6,8 @@
   "badge": "REAL (ERA5 reanalysis)",
   "init_time": "2020-05-10 00:00:00",
   "start": "2020-05-10 00:00:00",
-  "end": "2020-05-25 18:00:00"
+  "end": "2020-05-25 18:00:00",
+  "source": "ERA5 reanalysis (WeatherBench 2), India box, 0.25 deg -> G12 bilinear"
  },
  {
   "case": "amphan_replay",
@@ -15,7 +16,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2020-05-15 06:00:00",
   "start": "2020-05-15 06:00:00",
-  "end": "2020-05-25 06:00:00"
+  "end": "2020-05-25 06:00:00",
+  "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cold_01",
@@ -24,7 +26,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2022-12-20 00:00:00",
   "start": "2022-12-20 00:00:00",
-  "end": "2022-12-30 00:00:00"
+  "end": "2022-12-30 00:00:00",
+  "source": "SYNTHETIC (ERA5 coldwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cold_02",
@@ -33,7 +36,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2022-12-26 00:00:00",
   "start": "2022-12-26 00:00:00",
-  "end": "2023-01-05 00:00:00"
+  "end": "2023-01-05 00:00:00",
+  "source": "SYNTHETIC (ERA5 coldwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cold_03",
@@ -42,7 +46,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2023-01-01 00:00:00",
   "start": "2023-01-01 00:00:00",
-  "end": "2023-01-11 00:00:00"
+  "end": "2023-01-11 00:00:00",
+  "source": "SYNTHETIC (ERA5 coldwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cold_04",
@@ -51,7 +56,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2023-01-08 00:00:00",
   "start": "2023-01-08 00:00:00",
-  "end": "2023-01-18 00:00:00"
+  "end": "2023-01-18 00:00:00",
+  "source": "SYNTHETIC (ERA5 coldwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cyc_01",
@@ -60,7 +66,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2020-05-10 00:00:00",
   "start": "2020-05-10 00:00:00",
-  "end": "2020-05-20 00:00:00"
+  "end": "2020-05-20 00:00:00",
+  "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cyc_02",
@@ -69,7 +76,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2020-05-11 12:00:00",
   "start": "2020-05-11 12:00:00",
-  "end": "2020-05-21 12:00:00"
+  "end": "2020-05-21 12:00:00",
+  "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cyc_03",
@@ -78,7 +86,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2020-05-13 00:00:00",
   "start": "2020-05-13 00:00:00",
-  "end": "2020-05-23 00:00:00"
+  "end": "2020-05-23 00:00:00",
+  "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "cyc_04",
@@ -87,7 +96,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2020-05-14 12:00:00",
   "start": "2020-05-14 12:00:00",
-  "end": "2020-05-24 12:00:00"
+  "end": "2020-05-24 12:00:00",
+  "source": "SYNTHETIC (ERA5 amphan (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "heat_01",
@@ -96,7 +106,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2024-05-15 00:00:00",
   "start": "2024-05-15 00:00:00",
-  "end": "2024-05-25 00:00:00"
+  "end": "2024-05-25 00:00:00",
+  "source": "SYNTHETIC (ERA5 heatwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "heat_02",
@@ -105,7 +116,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2024-05-22 00:00:00",
   "start": "2024-05-22 00:00:00",
-  "end": "2024-06-01 00:00:00"
+  "end": "2024-06-01 00:00:00",
+  "source": "SYNTHETIC (ERA5 heatwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "heat_03",
@@ -114,7 +126,8 @@
   "badge": "SYNTHETIC",
   "init_time": "2024-05-29 00:00:00",
   "start": "2024-05-29 00:00:00",
-  "end": "2024-06-08 00:00:00"
+  "end": "2024-06-08 00:00:00",
+  "source": "SYNTHETIC (ERA5 heatwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  },
  {
   "case": "heat_04",
@@ -123,6 +136,7 @@
   "badge": "SYNTHETIC",
   "init_time": "2024-06-05 00:00:00",
   "start": "2024-06-05 00:00:00",
-  "end": "2024-06-15 00:00:00"
+  "end": "2024-06-15 00:00:00",
+  "source": "SYNTHETIC (ERA5 heatwave (real, anomalies soft-clipped: t2m 1.0 sigma, msl/tp 1.5 sigma))"
  }
 ]

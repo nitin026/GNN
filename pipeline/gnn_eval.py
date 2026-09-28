@@ -334,10 +334,11 @@ def main():
                           [graphs[c]["t"][ens[c]] for c in TEST])
     figures(data, prod, rel, rel_own, real)
     cfgs = {v: models[v][2] for v in models}
-    (REP / "gnn_results.json").write_text(json.dumps(
+    from .jsonutil import dumps as strict_dumps
+    (REP / "gnn_results.json").write_text(strict_dumps(
         {"cases": res, "amphan_real": real, "decode": dec, "reliability_truth": rel,
          "reliability_member": rel_own, "cones": {c: prod[c]["cone"] for c in prod},
-         "train_configs": cfgs}, indent=1, default=float))
+         "train_configs": cfgs}, indent=1))
     write_report(res, real, dec, rel, cfgs)
 
 

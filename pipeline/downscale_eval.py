@@ -30,6 +30,7 @@ import xarray as xr  # noqa: E402
 
 from .downscale import (VARS, Normalizer, ResidualDiffusion, UNetDownscaler, avgpool, baseline,  # noqa: E402
                         cond_input, project)
+from .jsonutil import dumps as strict_dumps  # noqa: E402
 from .splits import TEST  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -509,13 +510,13 @@ def main():
                                                         "diffusion_sample", "diffusion_mean")}}
     seconds = time.time() - t0
     slim = {m: {v: {k: x for k, x in r.items() if k != "spectrum"} for v, r in d.items()} for m, d in res.items()}
-    (REP / "downscaling_results.json").write_text(json.dumps(
+    (REP / "downscaling_results.json").write_text(strict_dumps(
         {"test_cases": TEST, "lead_steps": LEAD_STEPS, "patches_per_lead": PATCHES_PER_LEAD,
          "n_samples": N_SAMPLES, "metrics": slim,
          "spectra": {m: {v: res[m][v]["spectrum"] for v in EVAL_VARS} for m in MODELS},
          "imd_perfect_model": imd, "per_case": per_case, "peak_rss_mb": PEAK["rss"],
          "seconds": seconds, "configs": {"unet": cu, "diffusion": cd}, "example_tp_max": ex_max},
-        indent=1, default=float))
+        indent=1))
     write_report(res, imd, per_case, cu, seconds, ex_max)
     print(f"done in {seconds:.0f}s, peak RSS {PEAK['rss']:.0f} MB")
 

@@ -775,7 +775,7 @@
    "v2": {
     "iou_mean": 0.0,
     "iou_daily": 0.0,
-    "centroid_err_km": NaN,
+    "centroid_err_km": null,
     "truth_tracks": 0,
     "truth_spurious": 0,
     "ens_spurious": 27,

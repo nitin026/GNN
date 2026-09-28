@@ -9,10 +9,12 @@ Per case:
                        (ensemble-mean position + spread per lead) and 4-D bounding boxes
   strike_prob/{lead}.png      probability overlay (cyclone: event centre within 120 km;
                               heat/cold: cell inside the member's tracked event object)
-  fields_12km/{var}/{lead}.png, fields_5km/{var}/{lead}.png   member 0 (control-like member; the
-                       ERA5 run for the real case) at 12 km and U-Net-downscaled to 5 km on the SAME
+  fields_12km/{var}/{lead}.png, fields_5km/{var}/{lead}.png   the representative member (main
+                       track closest to the consensus; the ERA5 run for the real case) at 12 km and U-Net-downscaled to 5 km on the SAME
                        colour scale; var in t2m, wind, msl, tp (+ anom at 12 km: hazard z-score)
   alerts.json          alerts per lead from backend/alert_rules.py
+  alert_grid.npz       per-cell category + neighbourhood probabilities per lead (district roll-up);
+                       `python scripts/export_products.py --grids-only [case ...]` writes only this
 All numbers come from the pipeline; nothing is typed in by hand.
 """
 import json
@@ -35,6 +37,7 @@ from backend.alert_rules import CATEGORIES, COLOURS, NBHD_KM, categorise, probab
 from pipeline.anomaly import Climatology  # noqa: E402
 from pipeline.downscale import Normalizer, UNetDownscaler  # noqa: E402
 from pipeline.gnn_eval import cone, decode, gnn_main_track, infer, load_graph, load_model  # noqa: E402
+from pipeline.jsonutil import dumps as strict_dumps  # noqa: E402
 from pipeline.splits import ALL  # noqa: E402
 from pipeline.track import haversine_km  # noqa: E402
 from pipeline.tracker2 import cached_normals, regions, trailing  # noqa: E402
@@ -72,7 +75,29 @@ def write_png(path, a, var):
     im = Image.fromarray(np.flipud(idx), mode="P")    # PNG rows run north -> south
     im.putpalette(lut(cmap).ravel().tolist())
     path.parent.mkdir(parents=True, exist_ok=True)
-    im.save(path, optimize=True, transparency=0)
+    im.save(path, optimize=True, transparency=palette_alpha(var))
+
+
+def palette_alpha(var):
+    """tRNS alpha per palette index: index 0 transparent. Probability overlays fade in over
+    P = 0..0.25 so near-zero probabilities (dark end of the colour map) do not paint dark blobs."""
+    if var != "strike":
+        return 0
+    p = np.r_[0.0, np.linspace(0, 1, 255)]
+    a = np.clip(p / 0.25, 0, 1) * 255
+    a[0] = 0
+    return bytes(a.astype(np.uint8).tolist())
+
+
+def restyle_strike(case):
+    """Rewrite existing strike_prob PNGs with palette_alpha('strike') (same indices and palette)."""
+    for f in sorted((OUT / case / "strike_prob").glob("*.png")):
+        im = Image.open(f)
+        idx = np.array(im)
+        pal = im.getpalette()
+        new = Image.fromarray(idx, mode="P")
+        new.putpalette(pal)
+        new.save(f, optimize=True, transparency=palette_alpha("strike"))
 
 
 def legend(var):
@@ -85,6 +110,66 @@ def legend(var):
 
 
 # ----------------------------------------------------------------------------- data loading
+def load_file(path, hazard, case, source=None):
+    """A 12 km ensemble NetCDF (uploaded or operational) in the fcst_12km.nc layout: dims
+    (number, step [h], latitude, longitude), variables msl [Pa], u10, v10 [m/s], t2m [K], tp [mm/6h],
+    global attribute init_time (or a scalar `time`). Other lat/lon grids are bilinearly regridded to
+    G12. msl is required; a missing t2m is filled with the ERA5 climatological mean, missing
+    u10/v10/tp with 0, and the fill is recorded in `source`."""
+    from pipeline.anomaly import Climatology
+    from synth.background import Regridder
+    f = xr.open_dataset(path, decode_timedelta=False)
+    if "msl" not in f:
+        raise ValueError("the NetCDF needs an msl variable (Pa)")
+    if "member" in f.dims and "number" not in f.dims:
+        f = f.rename({"member": "number"})
+    if "number" not in f.dims:
+        f = f.expand_dims("number")
+    tdim = "step" if "step" in f.dims else "time"
+    if "init_time" in f.attrs:
+        init = pd.Timestamp(f.attrs["init_time"])
+    elif "time" in f and f["time"].size == 1:
+        init = pd.Timestamp(f["time"].values.item())
+    else:
+        init = pd.Timestamp(f[tdim].values[0]) if tdim == "time" else None
+    if tdim == "step":
+        if init is None:
+            raise ValueError("no init time: add a global attribute init_time")
+        times = pd.DatetimeIndex([init + pd.Timedelta(hours=int(h)) for h in f.step.values])
+    else:
+        times = pd.to_datetime(f.time.values)
+    lat, lon = f.latitude.values, f.longitude.values
+    same = len(lat) == len(LAT12) and len(lon) == len(LON12) and np.allclose(lat, LAT12) and np.allclose(lon, LON12)
+    rg = None if same else Regridder(lat, lon, LAT12, LON12)
+    filled = []
+    ens = {}
+    for v in ("t2m", "u10", "v10", "msl", "tp"):
+        if v in f:
+            a = f[v].transpose("number", tdim, "latitude", "longitude").values.astype(np.float32)
+            if rg is not None:
+                a = np.array([[rg(np.nan_to_num(x, nan=float(np.nanmean(x)))) for x in m] for m in a])
+            ens[v] = a
+        else:
+            filled.append(v)
+    shp = ens["msl"].shape
+    for v in filled:
+        if v == "t2m":
+            clim = Climatology()
+            ens[v] = np.broadcast_to(np.array([clim.get("t2m", t)[0] for t in times], np.float32), shp).copy()
+        else:
+            ens[v] = np.zeros(shp, np.float32)
+    syn = str(f.attrs.get("synthetic", "false")).lower() == "true"
+    src = source or f.attrs.get("source", f.attrs.get("title", Path(path).name))
+    if filled:
+        src += f" [missing {', '.join(filled)} filled: t2m = ERA5 climatology, others = 0]"
+    if rg is not None:
+        src += f" [regridded {len(lat)}x{len(lon)} -> G12 bilinear]"
+    f.close()
+    return {"case": case, "hazard": hazard, "synthetic": syn, "times": times, "init": times[0] if init is None else init,
+            "ens": ens, "labels": None, "source": ("SYNTHETIC " if syn else "UPLOADED ") + f"({src})",
+            "badge": "SYNTHETIC" if syn else "UPLOADED FORECAST (unverified)"}
+
+
 def load(case):
     if case == "amphan_era5_real":
         e = xr.open_dataset(ROOT / "data/real/era5/amphan_era5_g12.nc")
@@ -227,6 +312,26 @@ def tracks_geojson(c, member_tracks, cn):
     return {"type": "FeatureCollection", "features": feats}, boxes
 
 
+def representative_member(member_tracks, cn):
+    """Member shown in the field panels and used for alert pinpoints: the member whose GNN main
+    track covers the most consensus leads and, among those, lies closest to the consensus track
+    (mean distance). Needs no labels, so it works the same on a real ensemble. Falls back to
+    member 0 when nothing is tracked."""
+    if not cn:
+        return 0
+    ref = {t: (la, lo) for t, la, lo, _, _ in cn}
+    best, key = 0, None
+    for m, trs in enumerate(member_tracks):
+        mm = gnn_main_track(trs)
+        d = [haversine_km(o["center_lat"], o["center_lon"], *ref[t]) for t, o in mm or [] if t in ref]
+        if not d:
+            continue
+        k = (-len(d), float(np.mean(d)))
+        if key is None or k < key:
+            best, key = m, k
+    return best
+
+
 def strike(c, member_tracks, t, LA, LO):
     P = np.zeros((333, 333))
     for trs in member_tracks:
@@ -251,9 +356,11 @@ def circle(lat, lon, r_km=5.0, n=32):
              round(lat + r_km / 111.2 * np.sin(x), 5)] for x in a]
 
 
-def compute_alerts(c, clim, reg, india, ds5_intensity):
-    """Alerts for every lead; ds5_intensity[kind][t] is the member-0 5 km field used to put the
-    pinpoint (max intensity) inside each 12 km alert region."""
+def compute_alerts(c, clim, reg, india, ds5_intensity, grids=None):
+    """Alerts for every lead; ds5_intensity[kind][t] is the representative member's 5 km field used to put the
+    pinpoint (max intensity) inside each 12 km alert region. If `grids` (a dict) is given, the per-cell
+    category and the neighbourhood P(low/moderate/severe threshold) in percent are stored in it per
+    kind as (T, y, x) arrays (for the district roll-up); ds5_intensity=None computes only the grids."""
     e, times = c["ens"], c["times"]
     alerts = []
     kinds = HAZ_KIND[c["hazard"]]
@@ -289,6 +396,13 @@ def compute_alerts(c, clim, reg, india, ds5_intensity):
             p1, p2, p3 = probabilities(kind, f, v)
             q1, q2, q3 = probabilities(kind, f, v, neighbourhood=False)
             cat = categorise(p1, p2, p3)
+            if grids is not None:
+                shp = (len(times),) + cat.shape
+                grids.setdefault(f"{kind}_cat", np.zeros(shp, np.int8))[t] = cat
+                for lvl, pp in (("low", p1), ("moderate", p2), ("severe", p3)):
+                    grids.setdefault(f"{kind}_p_{lvl}", np.zeros(shp, np.uint8))[t] = np.round(100 * pp)
+            if ds5_intensity is None:
+                continue
             lab, n = ndimage.label(cat >= 1, structure=np.ones((3, 3)))
             for r in range(1, n + 1):
                 reg_m = lab == r
@@ -334,31 +448,45 @@ def compute_alerts(c, clim, reg, india, ds5_intensity):
 
 
 # ----------------------------------------------------------------------------- main
-def export_case(case, clim, ds, india, reg, dec):
+def export_case(case, clim, ds, india, reg, dec, c=None, out_root=OUT, stage=None):
+    """Export one case. With c (from load_file) the candidate graph is BUILT from c's ensemble
+    (an uploaded / operational forecast); otherwise the cached data/graphs/{case}.npz is used.
+    stage(name) is called as each stage starts (job progress)."""
+    stage = stage or (lambda name: None)
     t0 = time.time()
-    c = load(case)
-    out = OUT / case
+    fresh = c is not None
+    stage("load")
+    c = c if fresh else load(case)
+    out = out_root / case
     out.mkdir(parents=True, exist_ok=True)
-    real = not c["synthetic"]
-    variant = "temporal" if real else "full"
+    M = c["ens"]["msl"].shape[0]
+    variant = "temporal" if M == 1 else "full"     # a single run has no cross-member edges
     model, st, _ = load_model(variant)
-    g = load_graph("amphan_era5_real" if real else case)
+    stage("candidate graph")
+    if fresh:
+        from pipeline.graphs import build_graph
+        var = "msl" if c["hazard"] == "tropical_cyclone" else "t2m"
+        g = build_graph(c["hazard"], c["ens"][var].astype(np.float64), c["times"], LAT12, LON12, clim)
+    else:
+        g = load_graph(case)
+    stage("GNN tracking")
     pn, pe = infer(model, st, g)
     dp = dec[variant][c["hazard"]]
-    M = c["ens"]["msl"].shape[0]
     member_tracks = [decode(g, pn, pe, m, c["hazard"], **dp) for m in range(M)]
     core_masks(c, member_tracks, clim)
     cn = cone({"lat": LAT12, "lon": LON12}, member_tracks)
     gj, boxes = tracks_geojson(c, member_tracks, cn)
-    (out / "tracks.geojson").write_text(json.dumps(gj))
+    rep = representative_member(member_tracks, cn)
+    (out / "tracks.geojson").write_text(strict_dumps(gj))
     LA, LO = np.meshgrid(LAT12, LON12, indexing="ij")
     T = len(c["times"])
     var_hz = "msl" if c["hazard"] == "tropical_cyclone" else "t2m"
     ds5 = {"wind": [], "rain": [], "heat": [], "cold": []}
     tp5_hist = []
+    stage("downscaling + images")
     for t in range(T):
         write_png(out / "strike_prob" / f"{6 * t:03d}.png", strike(c, member_tracks, t, LA, LO), "strike")
-        e0 = {v: c["ens"][v][0, t].astype(np.float64) for v in ("t2m", "u10", "v10", "msl", "tp")}
+        e0 = {v: c["ens"][v][rep, t].astype(np.float64) for v in ("t2m", "u10", "v10", "msl", "tp")}
         f5 = ds(**e0)
         # 5 km PNGs every 12 h to stay under the 500 MB budget (12 km: every 6 h)
         for res, f in (("12km", e0), ("5km", f5)) if (6 * t) % 12 == 0 else (("12km", e0),):
@@ -375,18 +503,28 @@ def export_case(case, clim, ds, india, reg, dec):
         ds5["cold"].append(f5["t2m"].astype(np.float32))
         if t >= 4:
             tp5_hist[t - 4] = None
-    alerts = compute_alerts(c, clim, reg, india, ds5)
-    (out / "alerts.json").write_text(json.dumps({"case": case, "synthetic": c["synthetic"],
+    grids = {}
+    stage("alerts")
+    alerts = compute_alerts(c, clim, reg, india, ds5, grids)
+    write_grids(out, c, grids)
+    (out / "alerts.json").write_text(strict_dumps({"case": case, "synthetic": c["synthetic"],
                                                  "rules": "docs/ALERT_RULES.md", "alerts": alerts}))
-    meta = build_meta(c, boxes, variant, dp, time.time() - t0)
-    (out / "meta.json").write_text(json.dumps(meta, indent=1))
+    meta = build_meta(c, boxes, variant, dp, time.time() - t0, rep)
+    (out / "meta.json").write_text(strict_dumps(meta, indent=1))
     size = sum(p.stat().st_size for p in out.rglob("*") if p.is_file()) / 1e6
     print(f"{case}: {len(alerts)} alerts, {sum(len(x) for x in member_tracks)} tracks, "
           f"{size:.1f} MB, {time.time() - t0:.0f}s", flush=True)
     return size
 
 
-def build_meta(c, boxes, variant, dp, seconds):
+def write_grids(out, c, grids):
+    np.savez_compressed(out / "alert_grid.npz", **grids, kinds=np.array(HAZ_KIND[c["hazard"]]),
+                        leads_h=np.arange(len(c["times"])) * 6, synthetic=str(c["synthetic"]).lower(),
+                        grid="G12 0.12 deg 333x333", note="category 0..3 = none/low/moderate/severe; "
+                        "p_* = neighbourhood exceedance probability in percent")
+
+
+def build_meta(c, boxes, variant, dp, seconds, rep=0):
     gr = json.loads((ROOT / "reports/gnn_results.json").read_text())
     ds_path = ROOT / "reports/downscaling_results.json"
     case = c["case"]
@@ -403,13 +541,15 @@ def build_meta(c, boxes, variant, dp, seconds):
     metrics["downscaling"] = (json.loads(ds_path.read_text())["metrics"] if ds_path.exists()
                               else "pending: reports/downscaling_results.json not produced yet")
     return {"case": case, "hazard": c["hazard"], "synthetic": c["synthetic"],
-            "badge": "SYNTHETIC" if c["synthetic"] else "REAL (ERA5 reanalysis)",
+            "badge": c.get("badge") or ("SYNTHETIC" if c["synthetic"] else "REAL (ERA5 reanalysis)"),
             "source": c["source"], "init_time": str(c["init"]),
             "valid_times": [str(t) for t in c["times"]], "leads_h": [6 * i for i in range(len(c["times"]))],
             "n_members": int(c["ens"]["msl"].shape[0]),
             "bounds": BOUNDS, "grid_12km": "G12 0.12 deg 333x333", "grid_5km": "G5 0.04 deg 999x999",
             "leads_5km_h": [6 * i for i in range(len(c["times"])) if (6 * i) % 12 == 0],
-            "fields_member": "member 0" if c["synthetic"] else "ERA5 (single run)",
+            "fields_member": (f"member {rep} (closest to the GNN consensus track)" if c["synthetic"]
+                              else "ERA5 (single run)"),
+            "fields_member_index": int(rep),
             "downscaler": "U-Net + exact conservation projection (models/downscale/unet)",
             "tracker": f"GNN {variant} (models/tracker/{variant}), decode {dp}",
             "legends": {v: legend(v) for v in SCALES}, "bbox4d": boxes,
@@ -417,9 +557,36 @@ def build_meta(c, boxes, variant, dp, seconds):
             "metrics": metrics, "export_seconds": round(seconds, 1)}
 
 
+def write_index(out_root=OUT):
+    metas = [json.loads((p / "meta.json").read_text()) for p in sorted(out_root.iterdir())
+             if (p / "meta.json").exists()]
+    (out_root / "index.json").write_text(json.dumps(
+        [{k: m[k] for k in ("case", "hazard", "synthetic", "badge", "init_time")}
+         | {"start": m["valid_times"][0], "end": m["valid_times"][-1], "source": m["source"]} for m in metas],
+        indent=1))
+
+
 def main():
-    cases = sys.argv[1:] or ALL + ["amphan_era5_real"]
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    cases = args or ALL + ["amphan_era5_real"]
     clim = Climatology()
+    if "--restyle-strike" in sys.argv:
+        for case in cases:
+            restyle_strike(case)
+            print(f"{case}: strike_prob restyled", flush=True)
+        return
+    if "--grids-only" in sys.argv:             # only alert_grid.npz (no GNN, no downscaling)
+        orog = xr.open_dataset(ROOT / "data/real/dem/dem_g12.nc").orog.values.astype(np.float64)
+        reg = regions(orog, LAT12, LON12)
+        for case in cases:
+            t0 = time.time()
+            c = load(case)
+            grids = {}
+            compute_alerts(c, clim, reg, None, None, grids)
+            write_grids(OUT / case, c, grids)
+            print(f"{case}: alert_grid.npz {time.time() - t0:.0f}s", flush=True)
+            del c
+        return
     ds = Downscaler()
     orog = xr.open_dataset(ROOT / "data/real/dem/dem_g12.nc").orog.values.astype(np.float64)
     reg = regions(orog, LAT12, LON12)
@@ -428,12 +595,7 @@ def main():
     total = 0.0
     for c in cases:
         total += export_case(c, clim, ds, india, reg, dec)
-    idx = [json.loads((OUT / c / "meta.json").read_text()) for c in sorted(p.name for p in OUT.iterdir()
-                                                                             if (p / "meta.json").exists())]
-    (OUT / "index.json").write_text(json.dumps([{k: m[k] for k in ("case", "hazard", "synthetic", "badge",
-                                                                  "init_time")}
-                                               | {"start": m["valid_times"][0], "end": m["valid_times"][-1]}
-                                               for m in idx], indent=1))
+    write_index()
     print(f"total exported this run: {total:.1f} MB")
 
 

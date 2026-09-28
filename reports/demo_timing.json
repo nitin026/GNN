@@ -1,0 +1,53 @@
+{
+ "amphan_replay": {
+  "case": "amphan_replay",
+  "synthetic": true,
+  "hazard": "tropical_cyclone",
+  "members": 20,
+  "leads": 41,
+  "graph": "built",
+  "nodes": 4168,
+  "edges": 23722,
+  "tracks": 43,
+  "alerts": 75,
+  "severe_alerts": 13,
+  "max_z": 68.12554168701172,
+  "max_efi": 1.0,
+  "stages": [
+   {
+    "stage": "setup: climatology, DEM, masks, models",
+    "seconds": 1.82
+   },
+   {
+    "stage": "1 load 12 km ensemble NetCDF",
+    "seconds": 14.84
+   },
+   {
+    "stage": "2 z-score anomaly + EFI (all leads)",
+    "seconds": 15.76
+   },
+   {
+    "stage": "3 candidate objects + graph",
+    "seconds": 37.59
+   },
+   {
+    "stage": "4 GNN inference + track decoding",
+    "seconds": 0.76
+   },
+   {
+    "stage": "5 U-Net downscaling 12->5 km (member 0, 41 leads)",
+    "seconds": 37.16
+   },
+   {
+    "stage": "6 alerts (ensemble probability x IMD thresholds)",
+    "seconds": 14.02
+   }
+  ],
+  "total_seconds": 121.97,
+  "peak_rss_mb": 5844.9,
+  "machine": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel (Windows), CPU only",
+  "tracker": "GNN full",
+  "downscaler": "U-Net + exact conservation projection",
+  "measured_at": "2026-09-28T12:23:45"
+ }
+}

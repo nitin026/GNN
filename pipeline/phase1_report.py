@@ -15,6 +15,7 @@ import pandas as pd
 import xarray as xr
 
 from .anomaly import Climatology
+from .jsonutil import dumps as strict_dumps
 from .evaluate2 import evaluate, load_case, orog12
 from .splits import ALL, TEST, TRAIN, VAL
 from .track import haversine_km
@@ -71,8 +72,8 @@ def main():
     old_am = json.loads((REP / "baseline_results.json").read_text())["amphan_real"]
     before = json.loads((REP / "phase1_before.json").read_text())
     val = json.loads((REP / "synth_validation.json").read_text())
-    (REP / "phase1_results.json").write_text(json.dumps(
-        {"cases": res, "amphan_real_v2": am, "params": chosen}, indent=1, default=float))
+    (REP / "phase1_results.json").write_text(strict_dumps(
+        {"cases": res, "amphan_real_v2": am, "params": chosen}, indent=1))
     write_md(res, am, old_am, before, val, chosen)
 
 

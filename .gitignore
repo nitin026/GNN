@@ -25,3 +25,5 @@ backend/products/*
 !backend/products/heat_04/
 !backend/products/cold_04/
 !backend/products/amphan_era5_real/
+data/real/boundary/raw/
+data/uploads/

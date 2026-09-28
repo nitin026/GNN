@@ -49,7 +49,8 @@ The 0.2 and 0.5 cut-offs and the 50 km radius were set once by hand. They were n
    region, of the rule that set the category. **Reason** is that probability written out, e.g.
    `P(wind >= 118 km/h) = 0.65 within 50 km`.
 3. **Pinpoint (core coordinate)**: the 5 km cell with the most extreme value inside the region, taken
-   from member 0 downscaled to 5 km by the U-Net. Most extreme means maximum wind, 24 h rain or T2m,
+   from the representative member (the member whose GNN main track is closest to the consensus track;
+   `fields_member` in meta.json) downscaled to 5 km by the U-Net. Most extreme means maximum wind, 24 h rain or T2m,
    or minimum T2m for cold.
 4. **Impact polygon**: a 5 km-radius circle (32 vertices) around the pinpoint. `region_bbox` gives the
    12 km region's extent.

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIH 26078 Demo</title>
+<!-- BRIEF2 Phase 5 static dashboard. Reads backend/products/* (written by scripts/export_products.py).
+     Serve backend/ over http (scripts/demo.py does this); file:// blocks fetch(). No external requests. -->
+<style>
+:root{--bg:#0f1720;--panel:#17212c;--ink:#e6edf3;--mute:#8b9bab;--line:#2a3846;--accent:#4ea1ff;
+  --syn:#b35cff;--real:#1f9d55}
+@media (prefers-color-scheme: light){:root{--bg:#f4f6f8;--panel:#fff;--ink:#17202a;--mute:#5b6b7b;--line:#d5dde5}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0 12px 0 0}
+select,button,input{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+button{cursor:pointer}
+.badge{font-weight:700;font-size:12px;padding:3px 8px;border-radius:4px;color:#fff;letter-spacing:.04em}
+.badge.syn{background:var(--syn)} .badge.real{background:var(--real)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;padding:12px 16px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.card h2{font-size:13px;margin:0 0 8px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+canvas{width:100%;height:auto;display:block;border-radius:4px;background:#0a1016}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pair figure{margin:0} figcaption{font-size:12px;color:var(--mute);margin-top:4px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.row label{display:flex;gap:4px;align-items:center}
+#lead{flex:1;min-width:160px}
+.legend{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mute)}
+.legend .bar{height:10px;width:160px;border-radius:2px}
+#alerts{max-height:520px;overflow:auto}
+.al{border-left:6px solid;padding:6px 8px;margin:6px 0;background:rgba(127,127,127,.08);border-radius:4px;cursor:pointer}
+.al b{text-transform:uppercase}
+.al small{color:var(--mute);display:block}
+table{border-collapse:collapse;width:100%;font-size:12px} td,th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:right}
+td:first-child,th:first-child{text-align:left}
+.note{font-size:12px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Extreme-weather anomaly tracking · 12→5 km downscaling</h1>
+  <label>Case <select id="case"></select></label>
+  <span id="badge" class="badge"></span>
+  <span id="src" class="note"></span>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <div class="row">
+        <button id="play" aria-label="play">▶</button>
+        <input id="lead" type="range" min="0" max="240" step="6" value="0" aria-label="lead time">
+        <span id="leadtxt" style="min-width:210px"></span>
+      </div>
+      <div class="row">
+        <label>Field <select id="var"><option value="anom">anomaly (z)</option><option value="msl">MSLP</option>
+          <option value="wind">10 m wind</option><option value="tp">6 h rain</option><option value="t2m">T2m</option></select></label>
+        <label><input type="checkbox" id="lStrike" checked>strike probability</label>
+        <label><input type="checkbox" id="lTracks" checked>ensemble tracks</label>
+        <label><input type="checkbox" id="lCone" checked>consensus + cone</label>
+        <label><input type="checkbox" id="lBox" checked>4-D box</label>
+        <label><input type="checkbox" id="lAlerts" checked>alert pins</label>
+      </div>
+      <canvas id="map" width="760" height="760"></canvas>
+      <div class="row"><div class="legend" id="legField"></div><div class="legend" id="legStrike"></div></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2>12 km vs 5 km (same colour scale)</h2>
+      <div class="pair">
+        <figure><canvas id="c12" width="480" height="480"></canvas><figcaption id="cap12"></figcaption></figure>
+        <figure><canvas id="c5" width="480" height="480"></canvas><figcaption id="cap5"></figcaption></figure>
+      </div>
+      <p class="note">Zoomed to the 4-D box (+2°). 5 km fields are exported every 12 h; the nearest earlier 5 km lead is shown.</p>
+    </div>
+  </section>
+  <aside>
+    <div class="card">
+      <h2>Alert bulletin</h2>
+      <div id="alertsum" class="note"></div>
+      <div id="alerts"></div>
+      <p class="note">IMD colour code: yellow = low, orange = moderate, red = severe. Rules: docs/ALERT_RULES.md.</p>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2>Model performance (this case)</h2>
+      <div id="perf"></div>
+    </div>
+  </aside>
+</main>
+<script>
+const P = "../products/";
+const $ = id => document.getElementById(id);
+let meta = null, tracks = null, alerts = [], india = null, timer = null, first = true;
+const imgCache = new Map();
+const ORDER = {severe: 3, moderate: 2, low: 1};
+
+function img(src) {
+  if (!imgCache.has(src)) imgCache.set(src, new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; }));
+  return imgCache.get(src);
+}
+const pad3 = h => String(h).padStart(3, "0");
+
+async function init() {
+  india = await (await fetch("india_outline.geojson")).json();
+  const idx = await (await fetch(P + "index.json")).json();
+  const q = new URLSearchParams(location.search).get("case");
+  for (const c of idx) {
+    const o = document.createElement("option");
+    o.value = c.case; o.textContent = `${c.case} · ${c.hazard} · ${c.badge}`;
+    $("case").append(o);
+  }
+  if (q && idx.some(c => c.case === q)) $("case").value = q;
+  for (const id of ["var", "lStrike", "lTracks", "lCone", "lBox", "lAlerts"]) $(id).onchange = draw;
+  $("lead").oninput = draw;
+  $("case").onchange = load;
+  $("play").onclick = () => {
+    if (timer) { clearInterval(timer); timer = null; $("play").textContent = "▶"; return; }
+    $("play").textContent = "❚❚";
+    timer = setInterval(() => { const l = $("lead"); l.value = (+l.value + 6) % (+l.max + 6); draw(); }, 700);
+  };
+  await load();
+}
+
+async function load() {
+  const c = $("case").value;
+  meta = await (await fetch(P + c + "/meta.json")).json();
+  tracks = await (await fetch(P + c + "/tracks.geojson")).json();
+  alerts = (await (await fetch(P + c + "/alerts.json")).json()).alerts;
+  $("badge").textContent = meta.badge;
+  $("badge").className = "badge " + (meta.synthetic ? "syn" : "real");
+  $("src").textContent = meta.source;
+  $("lead").max = meta.leads_h[meta.leads_h.length - 1];
+  $("var").value = "anom";
+  const ql = new URLSearchParams(location.search).get("lead");
+  if (ql !== null && first) $("lead").value = ql;
+  first = false;
+  perf();
+  draw();
+}
+
+// ---- projection: equirectangular over meta.bounds [lon0, lat0, lon1, lat1]
+function proj(cv, view) {
+  const [a, b, c, d] = view;
+  return (lon, lat) => [(lon - a) / (c - a) * cv.width, (d - lat) / (d - b) * cv.height];
+}
+function drawImg(ctx, cv, im, view) {
+  if (!im) return;
+  const [a, b, c, d] = meta.bounds, [va, vb, vc, vd] = view;
+  const sx = (va - a) / (c - a) * im.width, sw = (vc - va) / (c - a) * im.width;
+  const sy = (d - vd) / (d - b) * im.height, sh = (vd - vb) / (d - b) * im.height;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(im, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+}
+function outline(ctx, pr) {
+  ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 1.2;
+  for (const f of india.features) for (const line of f.geometry.coordinates) {
+    ctx.beginPath(); line.forEach(([x, y], i) => { const [px, py] = pr(x, y); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke();
+  }
+}
+function legend(el, key, label) {
+  const L = meta.legends[key];
+  el.innerHTML = `${label}: ${L.vmin}<span class="bar" style="background:linear-gradient(90deg,${L.stops.map(s => s.color).join(",")})"></span>${L.vmax} ${L.units}`;
+}
+
+async function draw() {
+  const lead = +$("lead").value, v = $("var").value, c = $("case").value;
+  const ti = meta.leads_h.indexOf(lead);
+  $("leadtxt").textContent = `+${lead} h · valid ${meta.valid_times[ti] ?? "–"}`;
+  const cv = $("map"), ctx = cv.getContext("2d"), view = meta.bounds, pr = proj(cv, view);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const [fi, si] = await Promise.all([img(`${P}${c}/fields_12km/${v}/${pad3(lead)}.png`),
+                                      $("lStrike").checked ? img(`${P}${c}/strike_prob/${pad3(lead)}.png`) : null]);
+  if (+$("lead").value !== lead) return;                       // slider moved on
+  drawImg(ctx, cv, fi, view);
+  if (si) { ctx.globalCompositeOperation = "screen"; drawImg(ctx, cv, si, view); ctx.globalCompositeOperation = "source-over"; }  // inferno black = no-op
+  outline(ctx, pr);
+  legend($("legField"), v, v === "anom" ? "anomaly" : v);
+  $("legStrike").innerHTML = ""; if ($("lStrike").checked) legend($("legStrike"), "strike", "strike P");
+  // tracks up to the current lead
+  for (const f of tracks.features) {
+    const p = f.properties;
+    if (p.kind === "member_track" && $("lTracks").checked) {
+      const pts = f.geometry.coordinates.filter((_, i) => p.leads_h[i] <= lead);
+      if (pts.length < 1) continue;
+      ctx.strokeStyle = p.main ? "rgba(255,255,255,.7)" : "rgba(200,200,200,.35)"; ctx.lineWidth = p.main ? 1.4 : .8;
+      ctx.beginPath(); pts.forEach(([x, y], i) => { const [a, b] = pr(x, y); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.stroke();
+    }
+    if (p.kind === "consensus" && $("lCone").checked) {
+      ctx.fillStyle = "rgba(78,161,255,.18)";
+      f.geometry.coordinates.forEach(([x, y], i) => {
+        if (p.leads_h[i] > lead) return;
+        const [a, b] = pr(x, y), r = p.spread_km[i] / 111.2 / (view[2] - view[0]) * cv.width;
+        ctx.beginPath(); ctx.arc(a, b, Math.max(r, 2), 0, 7); ctx.fill();
+      });
+      ctx.strokeStyle = "#4ea1ff"; ctx.lineWidth = 2.5; ctx.beginPath();
+      f.geometry.coordinates.forEach(([x, y], i) => { if (p.leads_h[i] > lead) return; const [a, b] = pr(x, y); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); });
+      ctx.stroke();
+    }
+    if (p.kind === "bbox4d" && $("lBox").checked) {
+      const on = lead >= p.lead_start_h && lead <= p.lead_end_h;
+      ctx.setLineDash(on ? [] : [6, 5]); ctx.strokeStyle = on ? "#ffd400" : "rgba(255,212,0,.5)"; ctx.lineWidth = 2;
+      const [x0, y0] = pr(p.lon_min, p.lat_max), [x1, y1] = pr(p.lon_max, p.lat_min);
+      ctx.strokeRect(x0, y0, x1 - x0, y1 - y0); ctx.setLineDash([]);
+      ctx.fillStyle = "#ffd400"; ctx.font = "12px system-ui";
+      ctx.fillText(`4-D box +${p.lead_start_h}–${p.lead_end_h} h, ${p.level_hPa_bottom}–${p.level_hPa_top} hPa`, x0 + 4, y0 - 5);
+    }
+  }
+  const now = alerts.filter(a => a.lead_h === lead).sort((a, b) => ORDER[b.category] - ORDER[a.category] || b.probability - a.probability);
+  if ($("lAlerts").checked) for (const a of now) {
+    const [x, y] = pr(a.pinpoint.lon, a.pinpoint.lat);
+    ctx.fillStyle = a.colour; ctx.strokeStyle = "#000"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fill(); ctx.stroke();
+  }
+  bulletin(now);
+  await pair(lead, v === "anom" ? "wind" : v);
+}
+
+function bulletin(now) {
+  const n = k => now.filter(a => a.category === k).length;
+  $("alertsum").textContent = `${now.length} alerts at this lead: ${n("severe")} severe, ${n("moderate")} moderate, ${n("low")} low` +
+    (meta.synthetic ? " (SYNTHETIC case)" : " (single ERA5 run: probabilities are 0/1)");
+  $("alerts").innerHTML = now.map(a => `<div class="al" style="border-color:${a.colour}">
+    <b>${a.category}</b> · ${a.kind} · ${a.in_india ? "India" : "marine / outside India"}
+    <small>${a.reason}</small>
+    <small>pinpoint ${a.pinpoint.lat.toFixed(2)}°N ${a.pinpoint.lon.toFixed(2)}°E · 5 km radius · valid ${a.valid_time} · per-cell P ${a.probability_cell}</small></div>`).join("")
+    || `<p class="note">No alerts at this lead.</p>`;
+}
+
+async function pair(lead, v) {
+  const c = $("case").value;
+  const l5 = meta.leads_5km_h.filter(h => h <= lead).pop() ?? 0;
+  const b = (meta.bbox4d && meta.bbox4d[0]) || {lon_min: 80, lon_max: 92, lat_min: 10, lat_max: 24};
+  const cx = (b.lon_min + b.lon_max) / 2, cy = (b.lat_min + b.lat_max) / 2;
+  const h = Math.max(b.lon_max - b.lon_min, b.lat_max - b.lat_min) / 2 + 2;
+  const view = [cx - h, cy - h, cx + h, cy + h];
+  const [i12, i5] = await Promise.all([img(`${P}${c}/fields_12km/${v}/${pad3(l5)}.png`), img(`${P}${c}/fields_5km/${v}/${pad3(l5)}.png`)]);
+  for (const [id, im] of [["c12", i12], ["c5", i5]]) {
+    const cv = $(id), ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, cv.width, cv.height); drawImg(ctx, cv, im, view); outline(ctx, proj(cv, view));
+  }
+  $("cap12").textContent = `12 km input, ${v}, +${l5} h`;
+  $("cap5").textContent = `5 km U-Net (exact conservation), ${v}, +${l5} h`;
+}
+
+function perf() {
+  const m = meta.metrics || {};
+  let h = "";
+  if (m.tracking) {
+    h += `<table><tr><th>method</th><th>IoU</th><th>CSI</th><th>FAR</th><th>spur.</th><th>err km</th></tr>`;
+    for (const [k, r] of Object.entries(m.tracking))
+      h += `<tr><td>${k}</td><td>${r.iou.toFixed(2)}</td><td>${r.csi.toFixed(2)}</td><td>${r.far.toFixed(2)}</td><td>${r.spurious_tracks}</td><td>${r.centroid_err_km.toFixed(0)}</td></tr>`;
+    h += `</table><p class="note">split: ${m.split}. Source: reports/gnn_results.json.</p>`;
+  }
+  if (m.amphan_track_error_vs_ibtracs) {
+    h += `<table><tr><th>method</th><th>fixes</th><th>mean km</th><th>median km</th></tr>`;
+    for (const [k, r] of Object.entries(m.amphan_track_error_vs_ibtracs))
+      h += `<tr><td>${k}</td><td>${r.n_matched}</td><td>${r.err_mean_km.toFixed(0)}</td><td>${r.err_median_km.toFixed(0)}</td></tr>`;
+    h += `</table><p class="note">REAL: ERA5 track vs IBTrACS best track.</p>`;
+  }
+  $("perf").innerHTML = h || `<p class="note">No metrics for this case.</p>`;
+}
+init();
+</script>
+</body>
+</html>

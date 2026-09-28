@@ -2269,7 +2269,7 @@
    "split": "test",
    "v2": {
     "iou": 0.0,
-    "centroid_err_km": NaN,
+    "centroid_err_km": null,
     "pod": 0.022857142857142857,
     "far": 0.9634703196347032,
     "csi": 0.0142602495543672,
@@ -2311,7 +2311,7 @@
    },
    "te_style": {
     "iou": 0.0,
-    "centroid_err_km": NaN,
+    "centroid_err_km": null,
     "pod": 0.04285714285714286,
     "far": 0.9280575539568345,
     "csi": 0.027598896044158234,
