@@ -142,6 +142,25 @@ if (ROOT / "reports/GNN_RESULTS.md").exists():
     for v in ("full", "temporal", "cross", "none"):
         check((ROOT / "models/tracker" / v / "config.json").exists(), f"GNN variant '{v}' trained")
 
+# BRIEF2 Phase 5 (demo) and Phase 6 (pitch)
+for pth in ("scripts/demo.py", "backend/static/index.html", "backend/static/india_outline.geojson",
+            "reports/RESULTS.md", "docs/PITCH.md", "scripts/make_results.py"):
+    check((ROOT / pth).exists(), f"{pth} exists")
+tj = ROOT / "reports/demo_timing.json"
+check(tj.exists(), "reports/demo_timing.json exists (inference time per forecast cycle)")
+if tj.exists():
+    tm = json.loads(tj.read_text())
+    ok = [r for r in tm.values() if r.get("graph") == "built"]
+    desc = ", ".join(f"{r['case']} {r['total_seconds']:.0f} s" for r in ok)
+    check(bool(ok) and all(r["total_seconds"] < 300 for r in ok),
+          f"demo forecast cycle < 5 min on CPU ({desc})")
+if (ROOT / "reports/RESULTS.md").exists():
+    t = (ROOT / "reports/RESULTS.md").read_text(encoding="utf-8")
+    check("What did not work" in t and "PRIOR_WORK" in t, "RESULTS.md cites PRIOR_WORK and has 'What did not work'")
+if (ROOT / "docs/PITCH.md").exists():
+    n = len(re.findall(r"^## \d+\.", (ROOT / "docs/PITCH.md").read_text(encoding="utf-8"), flags=re.M))
+    check(n >= 10, f"docs/PITCH.md has {n} slides (>= 10)")
+
 # --------------------------------------------------------------------------- BRIEF4
 section("BRIEF4")
 check((ROOT / "reports/TUNING_LOG.md").exists(), "reports/TUNING_LOG.md exists")
@@ -180,7 +199,7 @@ try:
                          check=True).stdout
     for ph in range(1, 6):
         check(re.search(rf"^Phase {ph}\b", log, flags=re.M) is not None, f"git commit for Phase {ph}")
-    for ph in range(0, 2):
+    for ph in (0, 1, 2, 3, 5, 6):
         check(re.search(rf"^BRIEF2 Phase {ph}\b", log, flags=re.M) is not None,
               f"git commit for BRIEF2 Phase {ph}")
 except (subprocess.CalledProcessError, FileNotFoundError) as e:
