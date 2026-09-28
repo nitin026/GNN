@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BarChart, Legend, LineChart, OKABE, Skeleton } from "../components/ui";
-import { fieldUrl, getReport } from "../api";
+import { fieldUrl, getReport, scenarioUrl } from "../api";
 import type { Meta } from "../types";
 
 const MODELS = ["bicubic+lapse", "unet", "diffusion_mean", "diffusion_sample"];
@@ -11,21 +11,27 @@ export default function Downscaling({ meta, lead }: { meta: Meta; lead: number }
   const [v, setV] = useState("tp");
   const [swipe, setSwipe] = useState(50);
   const [ds, setDs] = useState<any>(null);
+  const sc = meta.scenario;
+  const [scen, setScen] = useState<string>("unet");
+  const useScen = !!sc && scen !== "unet" && sc.vars.includes(v);
+  const lS = useScen ? ([...sc!.leads_h].reverse().find((h) => h <= lead) ?? sc!.leads_h[0]) : 0;
   const cv = useRef<HTMLCanvasElement>(null);
   const l5 = [...meta.leads_5km_h].reverse().find((h) => h <= lead) ?? 0;
   useEffect(() => { getReport("downscaling_results.json").then(setDs).catch(() => setDs(false)); }, []);
 
   useEffect(() => {
     let live = true;
-    Promise.all([img(fieldUrl(meta.case, v, "12km", l5)), img(fieldUrl(meta.case, v, "5km", l5))]).then(([a, b]) => {
+    const L5 = useScen ? lS : l5;
+    Promise.all([img(fieldUrl(meta.case, v, "12km", L5)), img(useScen ? scenarioUrl(meta.case, v, scen, L5) : fieldUrl(meta.case, v, "5km", L5))]).then(([a, b]) => {
       const c = cv.current;
       if (!live || !c) return;
       const ctx = c.getContext("2d")!;
       ctx.clearRect(0, 0, c.width, c.height);
-      const box = meta.bbox4d[0] ?? { lon_min: 80, lon_max: 92, lat_min: 10, lat_max: 24 };
+      const box = useScen ? { lon_min: sc!.bounds[0], lat_min: sc!.bounds[1], lon_max: sc!.bounds[2], lat_max: sc!.bounds[3] }
+        : (meta.bbox4d[0] ?? { lon_min: 80, lon_max: 92, lat_min: 10, lat_max: 24 });
       const [W, S, E, N] = meta.bounds;
       const cx = (box.lon_min + box.lon_max) / 2, cy = (box.lat_min + box.lat_max) / 2;
-      const h = Math.max(box.lon_max - box.lon_min, box.lat_max - box.lat_min) / 2 + 1.5;
+      const h = Math.max(box.lon_max - box.lon_min, box.lat_max - box.lat_min) / 2 + (useScen ? 0 : 1.5);
       const crop = (im: HTMLImageElement) => [((cx - h - W) / (E - W)) * im.width, ((N - (cy + h)) / (N - S)) * im.height,
         ((2 * h) / (E - W)) * im.width, ((2 * h) / (N - S)) * im.height] as const;
       ctx.imageSmoothingEnabled = false;
@@ -39,7 +45,7 @@ export default function Downscaling({ meta, lead }: { meta: Meta; lead: number }
       }
     });
     return () => { live = false; };
-  }, [meta, v, l5, swipe]);
+  }, [meta, v, l5, swipe, useScen, scen, lS]);
 
   const spec = ds?.spectra;
   const unit = v === "tp" ? "mm/6h" : v === "wind" ? "m/s" : v === "t2m" ? "degC" : "hPa";
@@ -48,11 +54,15 @@ export default function Downscaling({ meta, lead }: { meta: Meta; lead: number }
       <div className="toolbar">
         <label>Variable <select value={v} onChange={(e) => setV(e.target.value)}>{VARS.map((x) => <option key={x}>{x}</option>)}</select></label>
         <label className="grow">Swipe 12 km ◀▶ 5 km <input type="range" min={0} max={100} value={swipe} onChange={(e) => setSwipe(Number(e.target.value))} aria-label="Swipe between 12 km and 5 km" /></label>
-        <span className="note">+{l5} h (5 km exported every 12 h)</span>
+        {sc && <label>5 km scenario <select value={scen} onChange={(e) => setScen(e.target.value)} aria-label="diffusion scenario">
+          <option value="unet">U-Net (deterministic)</option>
+          {Array.from({ length: sc.samples }, (_, i) => <option key={i} value={`s${i + 1}`}>diffusion sample {i + 1}</option>)}
+          <option value="mean">diffusion mean</option><option value="p90">diffusion p90</option></select></label>}
+        <span className="note">+{useScen ? lS : l5} h {useScen ? `(scenarios every 12 h inside the 4-D box; ${sc!.model}; tp and wind only)` : "(5 km exported every 12 h)"}</span>
       </div>
       <div className="grid2">
         <div className="card">
-          <h2>12 km input (left) | 5 km U-Net, exact conservation (right)</h2>
+          <h2>12 km input (left) | 5 km {useScen ? `diffusion ${scen}` : "U-Net"}, exact conservation (right)</h2>
           <canvas ref={cv} width={640} height={640} className="swipe" aria-label={`${v} at 12 km and 5 km, same colour scale`} />
           <Legend legend={meta.legends[v]} title={v} />
           <p className="note">Same colour scale on both sides. Zoomed to the 4-D box + 1.5°. Member: {meta.fields_member}.</p>

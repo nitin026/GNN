@@ -36,9 +36,23 @@ DEFAULTS = {
 
 
 # ----------------------------------------------------------------------------- regions / normals
+def india_domain(lat, lon, buffer_km=250.0):
+    """Natural Earth India polygon (rasterised on G12, data/real/boundary/india_mask_g12.nc) plus a
+    buffer_km buffer (BRIEF4 Phase 3: the same mask in the tracker, the GNN graphs and the alerts).
+    Returns None if the grid is not G12 (then the rough imd_domain is used)."""
+    from pathlib import Path
+    import xarray as xr
+    f = Path(__file__).resolve().parents[1] / "data/real/boundary/india_mask_g12.nc"
+    if not f.exists() or len(lat) != 333 or len(lon) != 333 or abs(lat[0] - 0.06) > 1e-6:
+        return None
+    india = xr.open_dataset(f).india.values.astype(bool)
+    india = ndimage.binary_dilation(india, iterations=1)
+    return distance_transform_edt(~india) * (lat[1] - lat[0]) * KM <= buffer_km
+
+
 def regions(orog, lat, lon, coast_km=50.0):
-    """IMD region classes: 0 sea or excluded (> 2500 m), 1 plains, 2 coastal (< 50 km from sea),
-    3 hills (1000-2500 m)."""
+    """IMD region classes: 0 sea or excluded (> 2500 m, or outside India + 250 km), 1 plains,
+    2 coastal (< 50 km from sea), 3 hills (1000-2500 m)."""
     land = orog > 1.0
     dy = (lat[1] - lat[0]) * KM
     dist_sea = distance_transform_edt(land) * dy          # km to nearest sea cell (approx)
@@ -46,7 +60,8 @@ def regions(orog, lat, lon, coast_km=50.0):
     reg = np.where(land & (dist_sea <= coast_km), 2, reg)
     reg = np.where(land & (orog > 1000.0), 3, reg)
     reg = np.where(orog > 2500.0, 0, reg)      # Tibetan plateau / high Karakoram: not IMD domain
-    reg = np.where(imd_domain(orog, lat), reg, 0)
+    dom = india_domain(lat, lon)
+    reg = np.where(imd_domain(orog, lat) if dom is None else dom, reg, 0)
     return reg
 
 

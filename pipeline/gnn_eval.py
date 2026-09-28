@@ -48,13 +48,13 @@ def load_graph(case):
     return {k: z[k] for k in z.files}
 
 
-def load_model(variant):
-    d = MDIR / variant
+def load_model(variant, mdir=None):
+    d = (mdir or MDIR) / variant
     cfg = json.loads((d / "config.json").read_text())
     st = dict(np.load(d / "stats.npz"))
-    ut, uc = {"full": (1, 1), "temporal": (1, 0), "cross": (0, 1), "none": (0, 0)}[variant]
+    ut, uc = {"full": (1, 1), "temporal": (1, 0), "cross": (0, 1), "none": (0, 0), "none_small": (0, 0)}[variant]
     m = GNNTracker(cfg["n_node_features"], cfg["n_edge_features"], hidden=cfg["hidden"],
-                   use_temporal=bool(ut), use_cross=bool(uc))
+                   use_temporal=bool(ut), use_cross=bool(uc), readout=bool(cfg.get("readout", False)))
     m.load_state_dict(torch.load(d / "model.pt", map_location="cpu"))
     m.eval()
     return m, st, cfg
@@ -66,7 +66,7 @@ def infer(model, st, g):
     ef = torch.tensor((g["EF"] - st["em"]) / st["es"], dtype=torch.float32)
     e = torch.tensor(g["E"], dtype=torch.long)
     et = torch.tensor(g["EF"][:, -1] > 0.5)
-    nl, el = model(x, e, ef, et)
+    nl, el = model(x, e, ef, et, torch.tensor(g["t"].astype(np.int64)))
     return torch.sigmoid(nl).numpy(), torch.sigmoid(el).numpy()
 
 
@@ -98,7 +98,7 @@ def decode(g, pn, pe, member, hz, tau_n=0.5, tau_e=0.5, min_len=4):
     by_t = {}
     for i in sel:
         by_t.setdefault(int(g["t"][i]), []).append(int(i))
-    tracks, open_ = [], []
+    open_ = []
     for t in sorted(by_t):
         nodes = by_t[t]
         live = [tr for tr in open_ if t - int(g["t"][tr[-1]]) <= 2]

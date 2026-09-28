@@ -7,7 +7,6 @@ EFI is in [-1, 1]; 0 when the ensemble is distributed like the climate, -> +1 wh
 all members exceed the climate maximum.
 """
 import numpy as np
-from scipy.special import ndtri
 
 # Substituting p = sin^2(theta) gives dp / sqrt(p(1-p)) = 2 dtheta, which removes the endpoint
 # singularity: EFI = (2/pi) * int_0^{pi/2} 2 (p - F_f(p)) dtheta  (midpoint rule in theta).

@@ -1,0 +1,44 @@
+{
+ "model": "mesh",
+ "level": 5,
+ "hidden": 32,
+ "params": 45827,
+ "epochs": 6,
+ "members_per_case": 3,
+ "lead_stride": 3,
+ "lr": 0.002,
+ "seed": 0,
+ "best_epoch": 4,
+ "best_val_iou": 0.44104690616372366,
+ "train_cases": [
+  "cyc_01",
+  "cyc_02",
+  "heat_01",
+  "heat_02",
+  "cold_01",
+  "cold_02"
+ ],
+ "val_cases": [
+  "cyc_03",
+  "heat_03",
+  "cold_03"
+ ],
+ "features": [
+  "z_msl",
+  "z_t2m",
+  "wind/20",
+  "log1p(tp)/3",
+  "qconv_proxy",
+  "efi_lowmsl",
+  "efi_t2m",
+  "dem/3000",
+  "land",
+  "x",
+  "y",
+  "z",
+  "lead/240"
+ ],
+ "train_seconds": 2767.9,
+ "peak_rss_mb": 1753,
+ "compute": "torch 2.14.0+cpu on cpu (10 threads)"
+}

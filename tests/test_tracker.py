@@ -2,10 +2,8 @@
 import json
 
 import numpy as np
-import pandas as pd
-import xarray as xr
 
-from pipeline.track import detect, haversine_km, iou, link, main_track, track_masks
+from pipeline.track import detect, haversine_km, iou, link, track_masks
 
 
 def test_tracker_recovers_moving_blobs():

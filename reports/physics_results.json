@@ -1,0 +1,272 @@
+{
+ "physics_config": {
+  "model": "unet",
+  "epochs": 6,
+  "batch": 16,
+  "lr": 0.0002,
+  "base": 16,
+  "crop12": 32,
+  "seed": 0,
+  "best_epoch": 4,
+  "best_val_loss": 0.0829273118331611,
+  "train_seconds": 844.4611711502075,
+  "compute": "torch 2.14.0+cpu on cpu (10 threads)",
+  "n_train_patches": 1800,
+  "synthetic_training_data": "true",
+  "physics_weights": {
+   "rain": 0.005
+  },
+  "init": "models/downscale/unet",
+  "loss": "MSE + 0.1 spectral + 0.5 pinball(q=0.99, top-1% pixels) + physics {'rain': 0.005}"
+ },
+ "div_threshold_truth_p999": 0.00022116681654676262,
+ "violations_test": {
+  "bicubic+lapse": {
+   "rain_noconv": 45.46270428645486,
+   "div": 0.2554160309694164,
+   "lapse": 0.9206661003751682,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  },
+  "unet": {
+   "rain_noconv": 45.37203986262035,
+   "div": 0.40251692269921435,
+   "lapse": 8.611391307425498,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  },
+  "diffusion_sample": {
+   "rain_noconv": 45.41959713958185,
+   "div": 5.51845494879349,
+   "lapse": 15.842447087138105,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  },
+  "unet_phys": {
+   "rain_noconv": 45.3810201142138,
+   "div": 0.38780272341470257,
+   "lapse": 8.539720039640406,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  },
+  "diffusion_phys_sample": {
+   "rain_noconv": 45.449085952812815,
+   "div": 5.5234555844907405,
+   "lapse": 15.683177603171233,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  },
+  "truth": {
+   "rain_noconv": 45.410232717515406,
+   "div": 0.3258085411405724,
+   "lapse": 8.317406384936646,
+   "neg_rain": 0.0,
+   "q_le_qsat": "n/a (humidity is not a downscaled variable)",
+   "denominators": {
+    "rain_noconv": "% of wet cells (tp > 1 mm/6h) with convergence <= 0",
+    "div": "% of cells with |div V10| > truth p99.9",
+    "lapse": "% of cells with |dz'| > 200 m where T2m's sub-grid anomaly has the wrong sign (> 0.5 K)",
+    "neg_rain": "% of cells with rain < 0"
+   }
+  }
+ },
+ "data_metrics_test": {
+  "bicubic+lapse": {
+   "tp": {
+    "rmse": 1.5768837831806444,
+    "p99_ratio": 0.9881729200652529,
+    "peak_ratio": 0.8123672140956334,
+    "psd_ratio_10km": 0.06447938175265015
+   },
+   "wind": {
+    "rmse": 0.18771564287597314,
+    "p99_ratio": 1.0,
+    "peak_ratio": 0.9982781631757679,
+    "psd_ratio_10km": 0.09484223889796235
+   },
+   "t2m": {
+    "rmse": 0.6097727878547924,
+    "p99_ratio": 1.0,
+    "peak_ratio": 1.0037292443853916,
+    "psd_ratio_10km": 26.9373438375184
+   }
+  },
+  "unet": {
+   "tp": {
+    "rmse": 1.6741513093982439,
+    "p99_ratio": 0.9959216965742252,
+    "peak_ratio": 0.8595406992300194,
+    "psd_ratio_10km": 0.24505317769976015
+   },
+   "wind": {
+    "rmse": 0.21526039400769767,
+    "p99_ratio": 1.000407996736026,
+    "peak_ratio": 1.1212934944877648,
+    "psd_ratio_10km": 0.1313558340365942
+   },
+   "t2m": {
+    "rmse": 0.12151671199647665,
+    "p99_ratio": 0.9991311902693304,
+    "peak_ratio": 1.0240138565007724,
+    "psd_ratio_10km": 0.17706296343039035
+   }
+  },
+  "diffusion_sample": {
+   "tp": {
+    "rmse": 1.9935072810583598,
+    "p99_ratio": 1.0012234910277324,
+    "peak_ratio": 1.0525905128450563,
+    "psd_ratio_10km": 0.6038995553538561
+   },
+   "wind": {
+    "rmse": 1.241027344021819,
+    "p99_ratio": 1.0240718074255406,
+    "peak_ratio": 2.9102936145971916,
+    "psd_ratio_10km": 3.323805572346475
+   },
+   "t2m": {
+    "rmse": 1.822949418893629,
+    "p99_ratio": 1.0434404865334492,
+    "peak_ratio": 2.3646814326399412,
+    "psd_ratio_10km": 63.67008285408974
+   }
+  },
+  "unet_phys": {
+   "tp": {
+    "rmse": 1.5752614392161506,
+    "p99_ratio": 0.9946982055464927,
+    "peak_ratio": 0.8988352061160361,
+    "psd_ratio_10km": 0.2659864911515606
+   },
+   "wind": {
+    "rmse": 0.20923666028154506,
+    "p99_ratio": 1.000407996736026,
+    "peak_ratio": 1.0879715679048854,
+    "psd_ratio_10km": 0.12824049051348813
+   },
+   "t2m": {
+    "rmse": 0.11921563474645203,
+    "p99_ratio": 0.9991311902693304,
+    "peak_ratio": 1.0202225202407846,
+    "psd_ratio_10km": 0.17786634181429362
+   }
+  },
+  "diffusion_phys_sample": {
+   "tp": {
+    "rmse": 1.9354494934367976,
+    "p99_ratio": 1.0004078303425776,
+    "peak_ratio": 1.0750927227960976,
+    "psd_ratio_10km": 0.6074966129401868
+   },
+   "wind": {
+    "rmse": 1.2392221291929355,
+    "p99_ratio": 1.0236638106895144,
+    "peak_ratio": 2.9069758651438726,
+    "psd_ratio_10km": 3.404388704685979
+   },
+   "t2m": {
+    "rmse": 1.8212374454451281,
+    "p99_ratio": 1.0443092962641176,
+    "peak_ratio": 2.373943406627593,
+    "psd_ratio_10km": 64.37084287421654
+   }
+  }
+ },
+ "violations_imd": {
+  "bicubic+lapse": {
+   "rain_noconv": 52.54891280900815,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  },
+  "unet": {
+   "rain_noconv": 52.626360533354074,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  },
+  "diffusion_sample": {
+   "rain_noconv": 52.39641105686737,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  },
+  "unet_phys": {
+   "rain_noconv": 52.10865600608557,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  },
+  "diffusion_phys_sample": {
+   "rain_noconv": 52.675077556977726,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  },
+  "truth": {
+   "rain_noconv": 52.133175958835075,
+   "neg_rain": 0.0,
+   "note": "rain only; winds are the training mean, so the convergence proxy is ~0 everywhere"
+  }
+ },
+ "crop": {
+  "box": {
+   "lat_min": 6.24,
+   "lat_max": 18.48,
+   "lon_min": 77.52,
+   "lon_max": 95.28,
+   "level_hPa_bottom": 1013,
+   "level_hPa_top": 850,
+   "t_start": "2020-05-16 12:00:00",
+   "t_end": "2020-05-21 00:00:00",
+   "lead_start_h": 48,
+   "lead_end_h": 156,
+   "member_count_min": 10,
+   "n_members": 20,
+   "hazard": "tropical_cyclone",
+   "source": "GNN consensus"
+  },
+  "crop_cells_12km": [
+   116,
+   164
+  ],
+  "full_cells_12km": [
+   336,
+   336
+  ],
+  "full_seconds": 1.144,
+  "crop_seconds": 0.185,
+  "full_peak_mb": 1194,
+  "crop_peak_mb": 426,
+  "process_base_mb": 282,
+  "time_saved_pct": 83.8,
+  "area_fraction": 0.169,
+  "note": "U-Net, cyc_04 member 0, one lead; best of 3 fresh processes; peak = process peak working set (includes the ~base_mb of Python + torch + model)"
+ },
+ "peak_rss_mb": 615.018496
+}

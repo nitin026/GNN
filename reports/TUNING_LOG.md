@@ -29,3 +29,23 @@ Entries from BRIEF4 onwards are appended below as they are made.
 | # | phase | what was tuned | chosen on | value | test cases involved? |
 |---|---|---|---|---|---|
 | 14 | Phase 0 | evaluation design (leads every 24 h, 8 patches/lead, half on the event, seed 2026, 8 DDIM samples x 25 steps) | CPU budget, fixed before any results | as stated | no; evaluation only, nothing tuned |
+
+## BRIEF4 Phase 2: mesh GNN (2026-09-28)
+- First run with BCE pos_weight 5: after 2 epochs the heat/cold channels were ~0 everywhere
+  (max P 0.001 inside the heat_03 VAL event, whose z(T2m) is ~2.5). Event cells are ~2 % of the grid,
+  so the positive weight was raised to 20 and training restarted. Looked at: VAL heat_03 only.
+- Second run (pos_weight 20): still P ~0 for heat/cold on TRAIN heat_01 and VAL heat_03 while a per-pixel
+  logistic regression on the same features separates the heat mask with AUC 0.995 (VAL heat_03). Cause:
+  samples were fed case by case (~56 consecutive samples of one hazard), so the network forgot heat/cold.
+  Fix: each epoch's samples are pooled over all TRAIN cases and shuffled. Training restarted.
+- Phase 4, first physics grid (rain = 1 ...) stopped after 5 epochs of candidate a: VAL data loss 0.129
+  vs 0.081 for the plain U-Net. Measured on VAL: the physics terms are O(1-6) (rain 1.9, div 0.6,
+  lapse 6.2) against a data loss of ~0.15, and the synthetic TRUTH scores about the same (rain 1.7,
+  lapse 5.7), i.e. the proxy constraints are weak. New grid with weights 0.002-0.02.
+
+## BRIEF4 Phase 4: physics-loss weights (VAL)
+- Plain U-Net VAL data loss 0.0814; candidates (fine-tuned 6 epochs from the U-Net):
+  - {'rain': 0.005}: VAL data loss 0.0807, VAL physics {'rain': 0.4421532471856937, 'div': 0.4178723692893982, 'lapse': 6.55063716296492}
+  - {'rain': 0.005, 'div': 0.005, 'lapse': 0.002}: VAL data loss 0.0869, VAL physics {'rain': 0.4417187223283189, 'div': 0.18380372277621565, 'lapse': 1.9806759069705833}
+  - {'rain': 0.02, 'div': 0.02, 'lapse': 0.005}: VAL data loss 0.0934, VAL physics {'rain': 0.441665165816787, 'div': 0.12201361383857398, 'lapse': 0.6995650940927965}
+- Chosen: {'rain': 0.005} (lowest VAL physics penalty with data loss <= 1.05 x plain).

@@ -73,3 +73,19 @@ export function tooltip(info: any) {
   if (o.r !== undefined) return { text: `consensus +${o.lead} h\nspread ${(o.r / 1000).toFixed(0)} km, ${o.n} members` };
   return null;
 }
+
+/** IBTrACS best track (REAL events): white path + fixes; the fix at the current valid time is ringed. */
+export function ibtracs(meta: Meta, lead: number) {
+  const fixes = meta.ibtracs ?? [];
+  const vt = new Date((meta.valid_times[meta.leads_h.indexOf(lead)] ?? meta.valid_times[0]).replace(" ", "T") + "Z").getTime();
+  const path = fixes.map((f) => [f.lon, f.lat]);
+  const now = fixes.filter((f) => Math.abs(new Date(f.time.replace(" ", "T") + "Z").getTime() - vt) < 3 * 3600e3);
+  return [
+    new PathLayer<any>({ id: "ibtracs", data: [{ path }], getPath: (d) => d.path, getColor: [255, 255, 255, 230], widthUnits: "pixels",
+      getWidth: 2.5 }),
+    new ScatterplotLayer<any>({ id: "ibtracs-fixes", data: fixes, getPosition: (f) => [f.lon, f.lat], radiusUnits: "pixels", getRadius: 2.5,
+      getFillColor: [255, 255, 255, 200], pickable: true }),
+    new ScatterplotLayer<any>({ id: "ibtracs-now", data: now, getPosition: (f) => [f.lon, f.lat], radiusUnits: "pixels", getRadius: 7,
+      stroked: true, filled: false, getLineColor: [255, 255, 255, 255], lineWidthUnits: "pixels", getLineWidth: 2 }),
+  ];
+}

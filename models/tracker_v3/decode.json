@@ -1,0 +1,87 @@
+{
+ "full": {
+  "tropical_cyclone": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 2
+  },
+  "heat_dome": {
+   "tau_n": 0.5,
+   "tau_e": 0.5,
+   "min_len": 8
+  },
+  "cold_wave": {
+   "tau_n": 0.3,
+   "tau_e": 0.5,
+   "min_len": 2
+  }
+ },
+ "temporal": {
+  "tropical_cyclone": {
+   "tau_n": 0.5,
+   "tau_e": 0.5,
+   "min_len": 2
+  },
+  "heat_dome": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 8
+  },
+  "cold_wave": {
+   "tau_n": 0.3,
+   "tau_e": 0.5,
+   "min_len": 2
+  }
+ },
+ "cross": {
+  "tropical_cyclone": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 4
+  },
+  "heat_dome": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 8
+  },
+  "cold_wave": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 4
+  }
+ },
+ "none": {
+  "tropical_cyclone": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 2
+  },
+  "heat_dome": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 8
+  },
+  "cold_wave": {
+   "tau_n": 0.5,
+   "tau_e": 0.5,
+   "min_len": 2
+  }
+ },
+ "none_small": {
+  "tropical_cyclone": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 2
+  },
+  "heat_dome": {
+   "tau_n": 0.7,
+   "tau_e": 0.5,
+   "min_len": 8
+  },
+  "cold_wave": {
+   "tau_n": 0.3,
+   "tau_e": 0.5,
+   "min_len": 4
+  }
+ }
+}

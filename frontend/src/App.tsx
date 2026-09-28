@@ -7,7 +7,9 @@ const Operations = lazy(() => import("./views/Operations"));
 const Downscaling = lazy(() => import("./views/Downscaling"));
 const Alerts = lazy(() => import("./views/Alerts"));
 const Performance = lazy(() => import("./views/Performance"));
-const VIEWS = [["ops", "Operations"], ["ds", "Downscaling"], ["alerts", "Alerts"], ["perf", "Model performance"]] as const;
+const Forecaster = lazy(() => import("./views/Forecaster"));
+const RealEvents = lazy(() => import("./views/RealEvents"));
+const VIEWS = [["ops", "Operations"], ["fc", "Forecaster"], ["ds", "Downscaling"], ["alerts", "Alerts"], ["real", "Real events"], ["perf", "Model performance"]] as const;
 type View = (typeof VIEWS)[number][0];
 
 function initial<T extends string>(key: string, fallback: T): T {
@@ -65,6 +67,8 @@ export default function App() {
             {view === "ds" && <Downscaling meta={meta} lead={lead} />}
             {view === "alerts" && <Alerts meta={meta} lead={lead} setLead={setLead} theme={theme} />}
             {view === "perf" && <Performance />}
+            {view === "fc" && <Forecaster meta={meta} lead={lead} setLead={setLead} />}
+            {view === "real" && <RealEvents open={(c) => { setCaseId(c); setView("ops"); }} />}
           </Suspense>}
       </main>
       <footer className="note">SIH PS 26078 (MoES / NCMRWF) research prototype. Not for operational use without NEPS-G validation. Basemap © OpenStreetMap contributors.</footer>

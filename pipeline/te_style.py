@@ -53,11 +53,29 @@ def node_region(msl, i, j, lat, lon, r_deg=5.5):
     return m
 
 
-def te_cyclones(msl_series, lat, lon, range_deg=8.0, max_gap=1, min_len=4):
+def te_cyclones(msl_series, lat, lon, range_deg=8.0, max_gap=1, min_len=4, wind=None, rh850=None,
+                wind_min=10.0, wind_r_deg=2.5, rh_min=80.0, rh_r_deg=1.5):
+    """wind = |V10| series (T, y, x) enables the TempestExtremes-style wind criterion (max 10 m wind
+    >= wind_min m/s within wind_r_deg of the node, as in ...,"_VECMAG(U10,V10),max,0,2.5" output
+    filters). The warm-core criterion (300-500 hPa thickness/temperature anomaly) needs upper-air
+    data that the synthetic cases and our ERA5 surface files do not have; rh850 (T, y, x) enables a
+    documented PROXY instead: a moist core, mean RH850 >= rh_min % within rh_r_deg of the node."""
     frames = []
+    dlat = lat[1] - lat[0]
     for t, msl in enumerate(msl_series):
         objs = []
+        if not np.isfinite(msl).all():            # missing lead (e.g. GenCast 12-hourly): no nodes
+            frames.append(objs)
+            continue
         for i, j in detect_nodes(msl, lat, lon):
+            if wind is not None:
+                n = int(wind_r_deg / dlat)
+                if np.nanmax(wind[t][max(0, i - n):i + n + 1, max(0, j - n):j + n + 1]) < wind_min:
+                    continue
+            if rh850 is not None:
+                n = int(rh_r_deg / dlat)
+                if np.nanmean(rh850[t][max(0, i - n):i + n + 1, max(0, j - n):j + n + 1]) < rh_min:
+                    continue
             m = node_region(msl, i, j, lat, lon)
             objs.append({"mask": m, "center_lat": float(lat[i]), "center_lon": float(lon[j]),
                          "centroid_lat": float(lat[i]), "centroid_lon": float(lon[j]),

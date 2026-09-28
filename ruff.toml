@@ -1,0 +1,7 @@
+line-length = 130
+target-version = "py312"
+[lint]
+select = ["E", "F", "W"]
+ignore = ["E402", "E501", "E731", "E741"]
+[lint.per-file-ignores]
+"tests/*" = ["F841"]

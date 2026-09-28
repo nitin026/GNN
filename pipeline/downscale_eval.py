@@ -28,7 +28,7 @@ import psutil  # noqa: E402
 import torch  # noqa: E402
 import xarray as xr  # noqa: E402
 
-from .downscale import (VARS, Normalizer, ResidualDiffusion, UNetDownscaler, avgpool, baseline,  # noqa: E402
+from .downscale import (Normalizer, ResidualDiffusion, UNetDownscaler, baseline,  # noqa: E402
                         cond_input, project)
 from .jsonutil import dumps as strict_dumps  # noqa: E402
 from .splits import TEST  # noqa: E402

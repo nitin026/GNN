@@ -1,0 +1,86 @@
+{
+ "heat_01": {
+  "hazard": "heat_dome",
+  "old_label_cells": 103024,
+  "imd_label_cells": 88184,
+  "imd_steps": 28,
+  "old_steps": 29,
+  "truth_peak_abs_C": 51.52776489257815,
+  "truth_peak_departure_C": 10.79681396484375,
+  "meets_imd": true,
+  "plains_cells_ge_40C": 5586
+ },
+ "heat_02": {
+  "hazard": "heat_dome",
+  "old_label_cells": 15905,
+  "imd_label_cells": 8900,
+  "imd_steps": 25,
+  "old_steps": 25,
+  "truth_peak_abs_C": 47.45888671875002,
+  "truth_peak_departure_C": 9.33551025390625,
+  "meets_imd": true,
+  "plains_cells_ge_40C": 1145
+ },
+ "cold_01": {
+  "hazard": "cold_wave",
+  "old_label_cells": 24721,
+  "imd_label_cells": 1901,
+  "imd_steps": 15,
+  "old_steps": 15,
+  "truth_peak_abs_C": 1.6422363281250227,
+  "truth_peak_departure_C": 7.10968017578125,
+  "meets_imd": true
+ },
+ "cold_02": {
+  "hazard": "cold_wave",
+  "old_label_cells": 25560,
+  "imd_label_cells": 1358,
+  "imd_steps": 23,
+  "old_steps": 23,
+  "truth_peak_abs_C": 1.3066650390625227,
+  "truth_peak_departure_C": 6.762115478515625,
+  "meets_imd": true
+ },
+ "heat_03": {
+  "hazard": "heat_dome",
+  "old_label_cells": 75521,
+  "imd_label_cells": 50676,
+  "imd_steps": 19,
+  "old_steps": 19,
+  "truth_peak_abs_C": 48.6199890136719,
+  "truth_peak_departure_C": 10.521728515625,
+  "meets_imd": true,
+  "plains_cells_ge_40C": 5564
+ },
+ "cold_03": {
+  "hazard": "cold_wave",
+  "old_label_cells": 13124,
+  "imd_label_cells": 2479,
+  "imd_steps": 18,
+  "old_steps": 19,
+  "truth_peak_abs_C": 0.8333374023437727,
+  "truth_peak_departure_C": 7.51080322265625,
+  "meets_imd": true
+ },
+ "heat_04": {
+  "hazard": "heat_dome",
+  "old_label_cells": 34320,
+  "imd_label_cells": 142,
+  "imd_steps": 22,
+  "old_steps": 35,
+  "truth_peak_abs_C": 40.51778564453127,
+  "truth_peak_departure_C": 7.295623779296875,
+  "meets_imd": true,
+  "plains_cells_ge_40C": 10
+ },
+ "cold_04": {
+  "hazard": "cold_wave",
+  "old_label_cells": 18753,
+  "imd_label_cells": 898,
+  "imd_steps": 26,
+  "old_steps": 27,
+  "truth_peak_abs_C": 1.5755554199218977,
+  "truth_peak_departure_C": 7.089935302734375,
+  "meets_imd": true
+ }
+}

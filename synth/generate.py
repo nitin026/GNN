@@ -54,6 +54,8 @@ META = {  # CF units/long_name + NEPS-G (TIGGE) parameter short names
     "r850": ("%", "Relative humidity at 850 hPa", "r")}
 # fine-scale noise amplitudes (truth) - k^-5/3 spectrum, wavelengths < ~500 km
 FINE = {"t2m": 0.35, "u10": 0.6, "v10": 0.6, "msl": 20.0, "tp": 0.35, "r850": 2.0}
+# BRIEF4 Phase 4: SIH_FINE_SCALE='{"t2m": 0.5, ...}' rescales the fine-scale noise (scripts/retune_noise.py)
+FINE = {k: v * json.loads(os.environ.get("SIH_FINE_SCALE", "{}")).get(k, 1.0) for k, v in FINE.items()}
 
 CASES = {
     "cyc_01": dict(hazard="tropical_cyclone", window="amphan", init="2020-05-10T00", seed=101, basin="BoB"),
@@ -79,7 +81,7 @@ MASK_DEF = {"tropical_cyclone": "injected MSLP depression <= -400 Pa (4 hPa)",
 
 # =========================================================================== static fields
 def static_fields():
-    p5, p12 = ROOT / "data/real/dem/dem_g5.nc", ROOT / "data/real/dem/dem_g12.nc"
+    p5 = ROOT / "data/real/dem/dem_g5.nc"
     if p5.exists():
         o5 = xr.open_dataset(p5).orog.values.astype(np.float32)
         src = "Copernicus DEM GLO-90 (real)"
@@ -160,7 +162,6 @@ def cyclone_truth_state(cfg, rng, land12):
 
 def blob_truth_state(cfg, rng):
     hz = cfg["hazard"]
-    n = len(LEADS)
     if hz == "heat_dome":
         la0, lo0 = cfg["center"]
         amp = float(rng.uniform(4, 8))

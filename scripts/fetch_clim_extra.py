@@ -6,7 +6,6 @@ window, interpolated (same method as scripts/fetch_real.py clim()). Output (0.25
 interpolated on demand by pipeline.anomaly.Climatology):
     data/real/clim/era5_clim_extra_0p25.nc
 """
-import json
 import sys
 import time
 from pathlib import Path

@@ -1,0 +1,40 @@
+{
+ "t2m": {
+  "case": "heat_01",
+  "era5_native_slope_100_400km": -3.4452588359960448,
+  "p_ref_25km": 2.45150721427489,
+  "p_syn_25km": 1.2605491901404464,
+  "p_era5interp_25km": 0.06548384401640056,
+  "p_unit_noise_25km": 3.6852731646770924,
+  "old_amplitude": 0.35,
+  "new_amplitude": 0.8046416413792515,
+  "scale": 2.298976118226433,
+  "old_ratio_syn_over_ref_25km": 0.5141935470556195
+ },
+ "u10": {
+  "case": "amphan_replay",
+  "era5_native_slope_100_400km": -3.9495198607409225,
+  "p_ref_25km": 0.5226625267076097,
+  "p_syn_25km": 3.827177326696268,
+  "p_era5interp_25km": 0.054949758851504237,
+  "p_unit_noise_25km": 3.6852731646770924,
+  "old_amplitude": 0.6,
+  "new_amplitude": 0.3562499158736658,
+  "scale": 0.593749859789443,
+  "old_ratio_syn_over_ref_25km": 7.3224635996092475
+ },
+ "regenerated": {
+  "case": "heat_04",
+  "var": "t2m",
+  "p25_before": 1.0749887873741861,
+  "p25_after": 5.63888829512546,
+  "p50_before": 8.41367264672769,
+  "p50_after": 41.880042003656165,
+  "note": "retuned copy in data/synthetic_retuned (not in git); models were not retrained"
+ },
+ "scale": {
+  "t2m": 2.298976118226433,
+  "u10": 0.593749859789443,
+  "v10": 0.593749859789443
+ }
+}

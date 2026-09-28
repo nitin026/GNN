@@ -44,6 +44,9 @@ NODE_FEATURES = ["lead", "log_area", "peak", "mean", "lat", "lon", "sig_major", 
                  "cos2th", "sin2th", "frac_land", "frac_crit", "aux_max", "efi", "core",
                  "haz_tc", "haz_heat", "haz_cold"]
 EDGE_FEATURES = ["dist", "dpeak", "dlogarea", "dt", "overlap", "is_temporal"]
+# BRIEF4 Phase 3 edge set (edge_version=2): real information on the links. is_temporal stays last.
+EDGE_FEATURES_V2 = ["dist", "dpeak", "dlogarea", "dt", "overlap", "kalman_resid", "dmean", "steer_resid",
+                    "steer_cos", "agree", "is_temporal"]
 
 
 def static(lat, lon):
@@ -94,16 +97,25 @@ def shape_moments(ii, jj, lat, lon, w):
     return np.sqrt(max(ev[1], 0)) / 100.0, np.sqrt(max(ev[0], 0)) / 100.0, np.cos(2 * th), np.sin(2 * th)
 
 
-def objects_for_run(hz, f, aux, lat, lon, area, orog, reg, efi, emask=None, tmask=None):
+def objects_for_run(hz, f, aux, lat, lon, area, orog, reg, efi, emask=None, tmask=None, det=None):
+    """det = (prob (T, y, x), high, low, min_area_km2): detect the candidate objects on a
+    segmentation probability (mesh GNN, BRIEF4 Phase 2) instead of on the hazard field f; the node
+    features are still computed from f inside each object, so the object GNN sees the same
+    feature definitions it was trained on."""
     p = CAND[hz]
     rows, cells = [], []
     land = orog > 1.0
     for t in range(len(f)):
-        objs = detect_hysteresis(f[t], lat, lon, p["high"], p["low"], p["min_area_km2"], area)
+        if det is None:
+            objs = detect_hysteresis(f[t], lat, lon, p["high"], p["low"], p["min_area_km2"], area)
+        else:
+            objs = detect_hysteresis(det[0][t], lat, lon, det[1], det[2], det[3], area)
         for o in objs:
             m = o["mask"]
             ii, jj = np.nonzero(m)
             vals = f[t][ii, jj]
+            if det is not None and vals.max() <= p["low"]:          # keep weights positive
+                vals = vals - vals.min() + p["low"] + 1e-3
             s1, s2, c2, s2t = shape_moments(ii, jj, lat, lon, np.maximum(vals - p["low"], 1e-3))
             if hz == "tropical_cyclone":
                 k = int(np.argmin(aux[t][ii, jj]))
@@ -145,11 +157,21 @@ def hav(la1, lo1, la2, lo2):
     return 2 * 6371 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
-def build_edges(meta, cells, hz, cross_member=True):
+def build_edges(meta, cells, hz, cross_member=True, version=1, wind=None):
+    """Temporal (same member, dt = 1, 2 steps) and cross-member (same lead) edges within a distance
+    gate. version=2 adds (BRIEF4 Phase 3):
+      kalman_resid  distance between j and i's constant-velocity prediction (velocity from i's
+                    nearest predecessor in the same member one step earlier), / 500 km
+      dmean         change of the object-mean anomaly
+      steer_resid   distance between j and i advected by the steering wind at i (wind[i] =
+                    (u, v) m/s, the 10 m wind as a proxy for 850 hPa: the synthetic cases carry no
+                    850 hPa wind), / 500 km;  steer_cos: cosine between displacement and wind
+      agree         mean member agreement of i and j (fraction of the other members with an object
+                    within the cross-member gate at the same lead)
+    Cross-member edges get 0 for the motion features."""
     p = CAND[hz]
     member, t = meta["member"], meta["t"]
     la, lo = meta["centroid_lat"], meta["centroid_lon"]
-    cellset = [set(c.tolist()) for c in cells]
     E, F = [], []
     order = np.lexsort((t, member))
     by_mt = {}
@@ -158,18 +180,53 @@ def build_edges(meta, cells, hz, cross_member=True):
     lead_nodes = {}
     for i in range(len(t)):
         lead_nodes.setdefault(t[i], []).append(i)
+    if version >= 2:
+        M = max(int(member.max()) + 1, 1)
+        agree = np.zeros(len(t))
+        for tt, nodes in lead_nodes.items():
+            nodes = np.array(nodes)
+            ens = nodes[member[nodes] >= 0]
+            for i in nodes:
+                d = hav(la[i], lo[i], la[ens], lo[ens])
+                others = {int(member[j]) for j, dd in zip(ens, d) if dd <= p["m_gate"] and member[j] != member[i]}
+                agree[i] = len(others) / max(M - 1, 1)
+        vel = np.zeros((len(t), 2))                  # km per step (east, north), from predecessor
+        for i in range(len(t)):
+            prev = by_mt.get((member[i], t[i] - 1), [])
+            if prev:
+                d = hav(la[i], lo[i], la[prev], lo[prev])
+                k = prev[int(np.argmin(d))]
+                if d.min() <= p["t_gate"]:
+                    vel[i] = [(lo[i] - lo[k]) * KM * np.cos(np.deg2rad(la[i])), (la[i] - la[k]) * KM]
 
     def add(i, j, temporal):
         d = hav(la[i], lo[i], la[j], lo[j])
         gate = p["t_gate"] * (t[j] - t[i]) if temporal else p["m_gate"]
         if d > gate:
             return
-        a, b = cellset[i], cellset[j]
-        ov = len(a & b) / max(min(len(a), len(b)), 1) if (a and b) else 0.0
+        a, b = cells[i], cells[j]            # sorted, unique flat indices (no Python sets: memory)
+        ov = (len(np.intersect1d(a, b, assume_unique=True)) / max(min(len(a), len(b)), 1)
+              if (len(a) and len(b)) else 0.0)
         E.append((i, j))
-        F.append([d / 500.0, meta["peak"][j] - meta["peak"][i],
-                  np.log10(meta["area"][j]) - np.log10(meta["area"][i]),
-                  float(t[j] - t[i]), ov, float(temporal)])
+        row = [d / 500.0, meta["peak"][j] - meta["peak"][i],
+               np.log10(meta["area"][j]) - np.log10(meta["area"][i]), float(t[j] - t[i]), ov]
+        if version >= 2:
+            dt = float(t[j] - t[i])
+            disp = np.array([(lo[j] - lo[i]) * KM * np.cos(np.deg2rad(la[i])), (la[j] - la[i]) * KM])
+            if temporal:
+                kres = float(np.hypot(*(disp - vel[i] * dt))) / 500.0
+                if wind is not None:
+                    w = np.asarray(wind[i]) * 3.6 * 6 * dt          # m/s -> km over dt steps
+                    sres = float(np.hypot(*(disp - w))) / 500.0
+                    nw, nd = np.hypot(*w), np.hypot(*disp)
+                    scos = float(disp @ w / (nw * nd)) if nw > 0 and nd > 0 else 0.0
+                else:
+                    sres, scos = 0.0, 0.0
+            else:
+                kres = sres = scos = 0.0
+            row += [kres, meta["mean"][j] - meta["mean"][i], sres, scos, 0.5 * (agree[i] + agree[j])]
+        row.append(float(temporal))
+        F.append(row)
 
     for (m, tt), nodes in by_mt.items():
         for dt in (1, 2):
@@ -183,8 +240,9 @@ def build_edges(meta, cells, hz, cross_member=True):
                     i, j = nodes[a_], nodes[b_]
                     if member[i] != member[j] and member[i] >= 0 and member[j] >= 0:
                         add(i, j, False)
+    nf = len(EDGE_FEATURES_V2 if version >= 2 else EDGE_FEATURES)
     E = np.array(E, np.int64).reshape(-1, 2)
-    F = np.array(F, np.float32).reshape(-1, len(EDGE_FEATURES))
+    F = np.array(F, np.float32).reshape(-1, nf)
     return E, F
 
 
@@ -193,8 +251,13 @@ def edge_labels(E, meta):
     return (y[E[:, 0]] * y[E[:, 1]]).astype(np.float32)
 
 
-def build_graph(hz, ens, times, lat, lon, clim, truth=None, emask=None, tmask=None):
-    """Graph arrays for an ensemble ens (M, T, y, x) [+ optional truth run as member -1]."""
+def build_graph(hz, ens, times, lat, lon, clim, truth=None, emask=None, tmask=None, det=None,
+                edge_version=1, wind=None):
+    """Graph arrays for an ensemble ens (M, T, y, x) [+ optional truth run as member -1].
+    det = (probs {member (or -1 for truth): (T, y, x)}, high, low, min_area_km2) switches the
+    candidate detection to a segmentation probability (see objects_for_run).
+    edge_version=2 builds the BRIEF4 Phase 3 edge features; wind = {member: (u10, v10)} arrays
+    (T, y, x) give the steering wind at each node (optional)."""
     orog, india, domain = static(lat, lon)
     reg = regions(orog, lat, lon)
     area = cell_area_km2(lat, lon)
@@ -207,15 +270,25 @@ def build_graph(hz, ens, times, lat, lon, clim, truth=None, emask=None, tmask=No
         series = ens[m] if m >= 0 else truth
         f, aux = hazard_field(hz, series, times, clim, domain)
         own = None if emask is None else (emask[m] if m >= 0 else tmask)
+        dm = None if det is None else (det[0][m], det[1], det[2], det[3])
         rows, cells = objects_for_run(hz, f, aux, lat, lon, area, orog, reg, efi,
-                                      emask=own, tmask=tmask)
+                                      emask=own, tmask=tmask, det=dm)
+        if wind is not None and m in wind:
+            u, v = wind[m]
+            for r in rows:
+                i = int(np.abs(lat - r["centroid_lat"]).argmin())
+                j = int(np.abs(lon - r["centroid_lon"]).argmin())
+                r["wind"] = (float(u[r["t"], i, j]), float(v[r["t"], i, j]))
         all_rows += rows
         all_cells += cells
         member += [m] * len(rows)
+    if not all_rows:
+        raise ValueError(f"no candidate objects for {hz}: nothing to track")
+    wind_node = np.array([r.pop("wind", (0.0, 0.0)) for r in all_rows]) if wind is not None else None
     meta = {k: np.array([r[k] for r in all_rows]) for k in all_rows[0]}
     meta["member"] = np.array(member)
     X = feat_matrix(all_rows, hz)
-    E, EF = build_edges(meta, all_cells, hz)
+    E, EF = build_edges(meta, all_cells, hz, version=edge_version, wind=wind_node)
     ye = edge_labels(E, meta)
     offs = np.cumsum([0] + [len(c) for c in all_cells]).astype(np.int64)
     return dict(X=X, E=E, EF=EF, y_node=meta["y"].astype(np.float32),
@@ -224,10 +297,16 @@ def build_graph(hz, ens, times, lat, lon, clim, truth=None, emask=None, tmask=No
                 lat=meta["lat"], lon=meta["lon"], clat=meta["centroid_lat"],
                 clon=meta["centroid_lon"], area=meta["area"], cells=np.concatenate(all_cells),
                 cell_offsets=offs, hazard=hz, node_features=np.array(NODE_FEATURES),
-                edge_features=np.array(EDGE_FEATURES))
+                edge_features=np.array(EDGE_FEATURES_V2 if edge_version >= 2 else EDGE_FEATURES),
+                edge_version=edge_version)
 
 
-def build_case(case, clim=None):
+OUT_V2 = ROOT / "data" / "graphs_v2"
+
+
+def build_case(case, clim=None, edge_version=1, out=OUT, labels="orig"):
+    """labels='imd' uses the IMD-consistent daily heat/cold labels (scripts/imd_labels.py) for the
+    node / edge targets and y_truth (cyclones are unchanged)."""
     clim = clim or Climatology()
     lab = json.loads((SYN / case / "labels.json").read_text())
     hz = lab["hazard"]
@@ -239,24 +318,38 @@ def build_case(case, clim=None):
     truth = ds[f"{var}_truth"].values.astype(np.float64)
     emask = ds["event_mask"].values.astype(bool)
     tmask = ds["event_mask_truth"].values.astype(bool)
+    wind = None
+    if edge_version >= 2:
+        wind = {m: (ds.u10.isel(number=m).values.astype(np.float32), ds.v10.isel(number=m).values.astype(np.float32))
+                for m in range(ens.shape[0])}
+        wind[-1] = (ds.u10_truth.values.astype(np.float32), ds.v10_truth.values.astype(np.float32))
     ds.close()
-    g = build_graph(hz, ens, times, lat, lon, clim, truth=truth, emask=emask, tmask=tmask)
-    OUT.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(OUT / f"{case}.npz", **g, case=case, synthetic="true")
+    if labels == "imd" and hz != "tropical_cyclone":
+        z = np.load(SYN / case / "labels_imd.npz")
+        X = int(z["shape"][-1])
+        emask = np.unpackbits(z["event_mask_imd"], axis=-1)[..., :X].astype(bool)
+        tmask = np.unpackbits(z["event_mask_imd_truth"], axis=-1)[..., :X].astype(bool)
+    g = build_graph(hz, ens, times, lat, lon, clim, truth=truth, emask=emask, tmask=tmask,
+                    edge_version=edge_version, wind=wind)
+    out.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out / f"{case}.npz", **g, case=case, synthetic="true", labels=labels)
     return {"case": case, "nodes": len(g["X"]), "edges": len(g["E"]),
             "pos_nodes": int(g["y_node"].sum()), "pos_edges": int(g["y_edge"].sum()),
             "temporal_edges": int(g["EF"][:, -1].sum()), "cross_edges": int((g["EF"][:, -1] == 0).sum())}
 
 
-def build_amphan_real(clim=None):
+def build_amphan_real(clim=None, edge_version=1, out=OUT):
     """Single-member graph of REAL ERA5 Amphan MSLP on G12 (no labels)."""
     clim = clim or Climatology()
     ds = xr.open_dataset(ROOT / "data/real/era5/amphan_era5_g12.nc")
     msl = ds.msl.values.astype(np.float64)[None]
     times = pd.to_datetime(ds.time.values)
-    g = build_graph("tropical_cyclone", msl, times, ds.latitude.values, ds.longitude.values, clim)
+    wind = {0: (ds.u10.values.astype(np.float32), ds.v10.values.astype(np.float32))} if edge_version >= 2 else None
+    g = build_graph("tropical_cyclone", msl, times, ds.latitude.values, ds.longitude.values, clim,
+                    edge_version=edge_version, wind=wind)
     ds.close()
-    np.savez_compressed(OUT / "amphan_era5_real.npz", **g, case="amphan_era5_real", synthetic="false",
+    out.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out / "amphan_era5_real.npz", **g, case="amphan_era5_real", synthetic="false",
                         times=np.array([str(t) for t in times]))
     return {"case": "amphan_era5_real", "nodes": len(g["X"]), "edges": len(g["E"])}
 
@@ -264,5 +357,8 @@ def build_amphan_real(clim=None):
 if __name__ == "__main__":
     from .splits import ALL
     clim = Climatology()
-    for c in sys.argv[1:] or ALL + ["amphan_era5_real"]:
-        print(build_amphan_real(clim) if c == "amphan_era5_real" else build_case(c, clim), flush=True)
+    v2 = "--v2" in sys.argv                     # BRIEF4 Phase 3: v2 edges + IMD heat/cold labels
+    kw = dict(edge_version=2, out=OUT_V2) if v2 else {}
+    for c in [a for a in sys.argv[1:] if not a.startswith("--")] or ALL + ["amphan_era5_real"]:
+        r = build_amphan_real(clim, **kw) if c == "amphan_era5_real" else build_case(c, clim, labels="imd" if v2 else "orig", **kw)
+        print(r, flush=True)

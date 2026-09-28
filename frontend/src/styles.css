@@ -72,3 +72,9 @@ ul.plain { padding-left: 0; list-style: none; margin: 4px 0; } ul.plain li { mar
   .map { height: 58vh; }
   main, header, nav { padding-left: 10px; padding-right: 10px; }
 }
+
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.fpanel { margin: 0; } .fpanel canvas { width: 100%; height: auto; border-radius: 6px; }
+.explaindetail { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 6px; }
+.links { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 8px; }
+.links a { color: var(--accent); }

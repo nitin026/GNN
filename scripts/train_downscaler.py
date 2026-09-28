@@ -2,6 +2,8 @@
 
     python scripts/train_downscaler.py --model unet      [--bundle bundle] [--epochs 30]
     python scripts/train_downscaler.py --model diffusion [--bundle bundle] [--epochs 40]
+    python scripts/train_downscaler.py --model unet --physics rain=1,div=0.1,lapse=0.1 --init models/downscale/unet
+        (BRIEF4 Phase 4: fine-tune with the physics loss terms of pipeline/physics.py)
 The diffusion model needs a trained U-Net (its mean). Device via pipeline/compute.py, so the
 same command runs on CPU or a Colab/Kaggle GPU. TEST patches are never used here.
 """
@@ -58,7 +60,12 @@ def main():
     ap.add_argument("--base", type=int, default=16)
     ap.add_argument("--crop12", type=int, default=32, help="random training crop (12 km cells); 0 = full")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--physics", default="", help="physics loss weights, e.g. rain=1,div=0.1,lapse=0.1")
+    ap.add_argument("--init", default=None, help="start from this model directory (fine-tuning)")
     a = ap.parse_args()
+    wphys = {k: float(v) for k, v in (kv.split("=") for kv in a.physics.split(",") if kv)}
+    if wphys:
+        from pipeline.physics import physics_loss
     seed_all(a.seed)
     dev = device()
     print("compute:", describe(), flush=True)
@@ -79,8 +86,11 @@ def main():
         model = ResidualDiffusion(a.base).to(dev)
     else:
         model = unet
+        if a.init:
+            model.load_state_dict(torch.load(Path(a.init) / "model.pt", map_location=dev))
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
     hist, best, t0 = [], None, time.time()
+    phys_val = []
     for ep in range(epochs):
         model.train()
         tl, nb = 0.0, 0
@@ -90,6 +100,8 @@ def main():
             if a.model == "unet":
                 pred = model(b["x12"], b["dem12"], b["dem5"], norm)
                 loss, _ = downscale_loss(norm.n(pred), norm.n(b["y5"]))
+                if wphys:
+                    loss = loss + physics_loss(pred, b["x12"], b["dem5"], wphys)[0]
             else:
                 with torch.no_grad():
                     m = unet(b["x12"], b["dem12"], b["dem5"], norm)
@@ -104,12 +116,13 @@ def main():
         model.eval()
         vl, vb = 0.0, 0
         with torch.no_grad():
-            g = torch.Generator(device=dev).manual_seed(123)
             for b in batches(va, 32):
                 b = to(b)
                 if a.model == "unet":
                     pred = model(b["x12"], b["dem12"], b["dem5"], norm)
-                    loss, _ = downscale_loss(norm.n(pred), norm.n(b["y5"]))
+                    loss, _ = downscale_loss(norm.n(pred), norm.n(b["y5"]))   # data loss only (selection)
+                    if wphys:
+                        phys_val.append(physics_loss(pred, b["x12"], b["dem5"], wphys)[1])
                 else:
                     m = unet(b["x12"], b["dem12"], b["dem5"], norm)
                     inp, _ = cond_input(b["x12"], b["dem12"], b["dem5"], norm)
@@ -118,9 +131,12 @@ def main():
                     loss = model.loss(r, model.cond(norm.n(m), inp))
                 vl += loss.item()
                 vb += 1
-        hist.append({"epoch": ep, "train_loss": tl / nb, "val_loss": vl / vb})
-        if best is None or vl / vb < best[0]:
-            best = (vl / vb, ep)
+        hist.append({"epoch": ep, "train_loss": tl / nb, "val_loss": vl / vb,
+                     **({"val_physics": {k: float(np.mean([p[k] for p in phys_val])) for k in phys_val[0]}} if phys_val else {})})
+        sel = vl / vb + (sum(wphys[k] * hist[-1]["val_physics"][k] for k in wphys) if wphys else 0.0)
+        phys_val = []
+        if best is None or sel < best[0]:
+            best = (sel, ep)
             torch.save(model.state_dict(), out / "model.pt")
         print(f"ep {ep:3d} train {tl / nb:.4f} val {vl / vb:.4f} ({time.time() - t0:.0f}s)", flush=True)
     np.savez(out / "stats.npz", mean=mean, std=std)
@@ -129,7 +145,9 @@ def main():
            "seed": a.seed, "best_epoch": best[1], "best_val_loss": best[0],
            "train_seconds": time.time() - t0, "compute": describe(),
            "n_train_patches": int(len(tr["x12"])), "synthetic_training_data": "true",
-           "loss": "MSE + 0.1 spectral + 0.5 pinball(q=0.99, top-1% pixels)" if a.model == "unet"
+           "physics_weights": wphys, "init": a.init,
+           "loss": ("MSE + 0.1 spectral + 0.5 pinball(q=0.99, top-1% pixels)"
+                    + (f" + physics {wphys}" if wphys else "")) if a.model == "unet"
            else "DDPM epsilon-MSE on normalised residual (T=500)"}
     (out / "config.json").write_text(json.dumps(cfg, indent=1))
     (out / "history.json").write_text(json.dumps(hist, indent=1))

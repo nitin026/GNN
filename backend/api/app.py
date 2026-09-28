@@ -12,20 +12,53 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Path as Path_
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.api.jobs import HAZARDS, UPLOADS, JobManager
 from pipeline.jsonutil import clean
 from backend.api.store import PRODUCTS, STATIC, VARS_5, VARS_12, Store, district_rollup
 
-API_VERSION = "1.0.0"
+API_VERSION = "1.1.0"
+RATE = {"default": (240, 60.0), "run": (6, 3600.0)}      # (requests, per seconds) per client IP
 REPORTS = Path(__file__).resolve().parents[2] / "reports"
 MAX_UPLOAD_MB = 2048
 
 
-def create_app(products=PRODUCTS, runner=None):
+class RateLimiter:
+    """Sliding-window limit per (client, bucket); 429 with Retry-After when exceeded."""
+
+    def __init__(self, rate=RATE):
+        self.rate, self.hits = rate, {}
+
+    def check(self, client, bucket):
+        n, win = self.rate[bucket]
+        now = time.time()
+        q = [t for t in self.hits.get((client, bucket), []) if now - t < win]
+        if len(q) >= n:
+            self.hits[(client, bucket)] = q
+            return int(win - (now - q[0])) + 1
+        q.append(now)
+        self.hits[(client, bucket)] = q
+        return 0
+
+
+def versions():
+    """Model versions (config + weight file time) and data timestamps, for /health."""
+    root = Path(__file__).resolve().parents[2]
+    out = {}
+    for d in sorted(list((root / "models").glob("*/*")) + list((root / "models").glob("*/*/"))):
+        if (d / "config.json").exists() and (d / "model.pt").exists():
+            cfg = json.loads((d / "config.json").read_text())
+            out[d.relative_to(root / "models").as_posix()] = {
+                "trained": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime((d / "model.pt").stat().st_mtime)),
+                "best_epoch": cfg.get("best_epoch"), "params": cfg.get("params") or cfg.get("n_params")}
+    return out
+
+
+def create_app(products=PRODUCTS, runner=None, rate=RATE):
     store = Store(products)
     jobs = JobManager(runner) if runner else JobManager()
     app = FastAPI(title="SIH 26078 extreme-weather alerting API", version=API_VERSION,
@@ -35,10 +68,19 @@ def create_app(products=PRODUCTS, runner=None):
                        expose_headers=["X-Bounds", "X-Units", "X-Valid-Time", "X-Synthetic"])
     app.state.store, app.state.jobs = store, jobs
     lat_ms = []                                      # recent request latencies (ms) for /health
+    limiter = RateLimiter(rate)
+    model_versions = versions()
 
     @app.middleware("http")
     async def timing(request: Request, call_next):
         t0 = time.perf_counter()
+        client = request.client.host if request.client else "?"
+        bucket = "run" if (request.method == "POST" and request.url.path == "/run") else "default"
+        wait = limiter.check(client, bucket)
+        if wait:
+            from fastapi.responses import JSONResponse
+            return JSONResponse({"detail": f"rate limit: {rate[bucket][0]} requests per {rate[bucket][1]:.0f} s"},
+                                status_code=429, headers={"Retry-After": str(wait)})
         resp = await call_next(request)
         ms = (time.perf_counter() - t0) * 1000
         lat_ms.append(ms)
@@ -59,7 +101,14 @@ def create_app(products=PRODUCTS, runner=None):
     @app.get("/health", tags=["meta"])
     def health():
         s = sorted(lat_ms)
+        idx = store.root / "index.json"
         return {"status": "ok", "version": API_VERSION, "cases": len(store.index()),
+                "models": model_versions,
+                "data": {"products_index": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(idx.stat().st_mtime))
+                         if idx.exists() else None,
+                         "reports": {p.name: time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(p.stat().st_mtime))
+                                     for p in sorted(REPORTS.glob("*.json"))}},
+                "rate_limits": {k: f"{n} per {w:.0f} s" for k, (n, w) in rate.items()},
                 "jobs": {"queued": sum(j["status"] == "queued" for j in jobs.list()),
                          "running": sum(j["status"] == "running" for j in jobs.list())},
                 "latency_ms": {"n": len(s), "p50": round(s[len(s) // 2], 1) if s else None,
@@ -71,7 +120,7 @@ def create_app(products=PRODUCTS, runner=None):
         return store.index()
 
     @app.get("/cases/{case}", tags=["cases"])
-    def case_meta(case: str):
+    def case_meta(case: str = Path_(..., pattern=r"^[A-Za-z0-9_-]{1,64}$")):
         """Full meta.json: times, bounds, legends (units), 4-D boxes, metrics copied from reports/*.json."""
         return need_case(case)
 
@@ -154,6 +203,44 @@ def create_app(products=PRODUCTS, runner=None):
         if name not in allowed:
             raise HTTPException(404, f"available: {sorted(allowed)}")
         return clean(json.loads(allowed[name].read_text(encoding="utf-8")))     # strict JSON (NaN -> null)
+
+    @app.get("/alerts/{alert_id}", tags=["alerts"])
+    def alert_detail(alert_id: str = Path_(..., pattern=r"^[A-Za-z0-9_.:-]{1,120}$")):
+        """One alert with its "explain" block (members exceeding each threshold near the pinpoint, their
+        values, the calibration curve of the lead band), if scripts/export_extras.py was run."""
+        case = next((c["case"] for c in store.index() if alert_id.startswith(c["case"] + "-")), None)
+        if not case:
+            raise HTTPException(404, "unknown alert")
+        a = next((x for x in store.alerts(case) if x["id"] == alert_id), None)
+        if not a:
+            raise HTTPException(404, "unknown alert")
+        return a
+
+    @app.get("/bulletin", tags=["alerts"], response_class=HTMLResponse)
+    def bulletin(case: str, lead: Optional[int] = Query(None, ge=0, le=360), lang: Literal["en", "hi"] = "en"):
+        """IMD-style district bulletin (printable HTML; the browser saves it as PDF), English or Hindi."""
+        from backend.api.bulletin import render
+        m = need_case(case)
+        need_lead(m, lead)
+        r = district_rollup(store, case, lead)
+        if r is None:
+            raise HTTPException(404, "no district roll-up for this case")
+        return HTMLResponse(render(m, r, lang, lead))
+
+    @app.get("/events", tags=["cases"])
+    def events():
+        """REAL events: the locked split, which dashboard case shows each one, and the BRIEF4 Phase 1 scores."""
+        root = Path(__file__).resolve().parents[2]
+        spl = json.loads((root / "data/real/SPLITS.json").read_text())
+        rr = json.loads((REPORTS / "real_results.json").read_text()) if (REPORTS / "real_results.json").exists() else {}
+        cases = {store.meta(c["case"]).get("real_event"): c["case"] for c in store.index()
+                 if not c["synthetic"] and store.meta(c["case"]).get("real_event")}
+        out = []
+        for eid, e in spl["events"].items():
+            sc = rr.get("era5_real_val", {}).get(eid) or rr.get("era5_heat_cold", {}).get(eid)
+            out.append({"event": eid, "hazard": e["hazard"], "split": e["split"], "case": cases.get(eid),
+                        "scores": clean(sc) if e["split"] == "REAL-VAL" else "locked (REAL-TEST, BRIEF4 Phase 8)"})
+        return out
 
     @app.post("/run", tags=["run"], status_code=202)
     async def run(request: Request, case: Optional[str] = None,

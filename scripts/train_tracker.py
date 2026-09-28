@@ -24,7 +24,7 @@ from sklearn.metrics import average_precision_score  # noqa: E402
 from pipeline.gnn import GNNTracker  # noqa: E402
 
 VARIANTS = {"full": (True, True), "temporal": (True, False), "cross": (False, True),
-            "none": (False, False)}
+            "none": (False, False), "none_small": (False, False)}   # none_small: hidden 32 (BRIEF4 Phase 3)
 
 
 def load(path):
@@ -38,11 +38,12 @@ def to_tensors(g, stats, dev):
     return {"x": x, "e": torch.tensor(g["E"], dtype=torch.long, device=dev), "ef": ef,
             "et": torch.tensor(g["EF"][:, -1] > 0.5, device=dev),
             "yn": torch.tensor(g["y_node"], device=dev), "ye": torch.tensor(g["y_edge"], device=dev),
-            "ens": torch.tensor(g["member"] >= 0, device=dev)}
+            "ens": torch.tensor(g["member"] >= 0, device=dev),
+            "lead": torch.tensor(g["t"].astype(np.int64), device=dev)}
 
 
 def losses(model, b, pw_n, pw_e):
-    nl, el = model(b["x"], b["e"], b["ef"], b["et"])
+    nl, el = model(b["x"], b["e"], b["ef"], b["et"], b["lead"])
     m = b["ens"]                                  # train on ensemble members only (not truth run)
     em = m[b["e"][:, 0]] & m[b["e"][:, 1]]
     ln = F.binary_cross_entropy_with_logits(nl[m], b["yn"][m], pos_weight=pw_n)
@@ -59,6 +60,7 @@ def main():
     ap.add_argument("--hidden", type=int, default=64)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--readout", action="store_true", help="graph-level consensus readout (BRIEF4 Phase 3)")
     a = ap.parse_args()
     seed_all(a.seed)
     dev = device()
@@ -81,7 +83,7 @@ def main():
     B_va = [to_tensors(g, stats, dev) for g in va]
     ut, uc = VARIANTS[a.variant]
     model = GNNTracker(Xa.shape[1], Ea.shape[1], hidden=a.hidden, use_temporal=ut,
-                       use_cross=uc).to(dev)
+                       use_cross=uc, readout=a.readout).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=1e-4)
     out = Path(a.out) / a.variant
     out.mkdir(parents=True, exist_ok=True)
@@ -105,8 +107,10 @@ def main():
                 vl += float(loss)
                 m = b["ens"]
                 em = m[b["e"][:, 0]] & m[b["e"][:, 1]]
-                yn.append(b["yn"][m].cpu().numpy()); pn.append(torch.sigmoid(nl[m]).cpu().numpy())
-                ye.append(b["ye"][em].cpu().numpy()); pe.append(torch.sigmoid(el[em]).cpu().numpy())
+                yn.append(b["yn"][m].cpu().numpy())
+                pn.append(torch.sigmoid(nl[m]).cpu().numpy())
+                ye.append(b["ye"][em].cpu().numpy())
+                pe.append(torch.sigmoid(el[em]).cpu().numpy())
         ap_n = average_precision_score(np.concatenate(yn), np.concatenate(pn))
         ap_e = average_precision_score(np.concatenate(ye), np.concatenate(pe))
         hist.append({"epoch": ep, "train_loss": tl / len(B_tr), "val_loss": vl / len(B_va),
@@ -119,7 +123,7 @@ def main():
             print(f"ep {ep:3d} train {tl / len(B_tr):.3f} val {vl / len(B_va):.3f} "
                   f"AP node {ap_n:.3f} edge {ap_e:.3f} ({time.time() - t0:.0f}s)", flush=True)
     np.savez(out / "stats.npz", **stats)
-    cfg = {"variant": a.variant, "hidden": a.hidden, "epochs": a.epochs, "lr": a.lr, "seed": a.seed,
+    cfg = {"variant": a.variant, "hidden": a.hidden, "readout": a.readout, "graphs": str(gdir), "epochs": a.epochs, "lr": a.lr, "seed": a.seed,
            "best_epoch": best[1], "best_val_ap_sum": best[0], "train_cases": TRAIN, "val_cases": VAL,
            "n_node_features": int(Xa.shape[1]), "n_edge_features": int(Ea.shape[1]),
            "train_seconds": time.time() - t0, "compute": describe(), "synthetic_training_data": "true"}

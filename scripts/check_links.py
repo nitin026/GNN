@@ -4,7 +4,11 @@ http_status is the FINAL status after following redirects (a doi.org 302 that
 lands on a 403 publisher page counts as 403). first_hop_status is also kept.
 With --prune, table rows whose link is not 2xx/3xx are removed from PRIOR_WORK.md.
 """
-import csv, datetime as dt, re, sys, time
+import csv
+import datetime as dt
+import re
+import sys
+import time
 from pathlib import Path
 import requests
 
@@ -47,7 +51,8 @@ def main(prune):
         print(f"{st}\t{u}")
     with CSV.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
-        w.writeheader(); w.writerows(rows)
+        w.writeheader()
+        w.writerows(rows)
     bad = [r["url"] for r in rows if not good(r["http_status"])]
     print(f"GOOD={len(rows)-len(bad)} BAD={len(bad)}")
     if prune and bad:
@@ -57,7 +62,8 @@ def main(prune):
         # drop bad rows from the csv too, so it reflects the final file
         with CSV.open("w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=list(rows[0]))
-            w.writeheader(); w.writerows([r for r in rows if good(r["http_status"])])
+            w.writeheader()
+            w.writerows([r for r in rows if good(r["http_status"])])
         print("pruned:", *bad, sep="\n  ")
 
 

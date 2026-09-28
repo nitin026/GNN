@@ -1,4 +1,5 @@
 .venv/
+.venv312/
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -29,3 +30,5 @@ data/real/boundary/raw/
 data/uploads/
 data/graphs_v2/
 inbox/
+data/synthetic_retuned/
+inbox_test/

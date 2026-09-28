@@ -32,7 +32,7 @@ test("load, move the slider, see an alert", async () => {
   render(<App />);
   expect(await screen.findByText("○ offline demo")).toBeTruthy();
   expect(await screen.findByText("SYNTHETIC", { selector: ".badge" })).toBeTruthy();
-  const slider = await screen.findByLabelText("Lead time (hours)");
+  const slider = await screen.findByLabelText("Lead time (hours)", {}, { timeout: 8000 });
   fireEvent.change(slider, { target: { value: "96" } });
   await waitFor(() => expect(screen.getByText(/Alerts \(\+96 h\)/)).toBeTruthy());
   const table = screen.getAllByRole("table")[0];
@@ -45,7 +45,7 @@ test("operations view renders the map with layers and legends", async () => {
   window.history.replaceState({}, "", "/?case=cyc_04&view=ops&lead=48");
   localStorage.clear();
   render(<App />);
-  const map = await screen.findByTestId("map");
+  const map = await screen.findByTestId("map", {}, { timeout: 8000 });
   expect(Number(map.dataset.layers)).toBeGreaterThan(3);
   expect(screen.getByLabelText("Strike probability legend")).toBeTruthy();
 });

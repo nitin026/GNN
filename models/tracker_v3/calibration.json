@@ -1,0 +1,50 @@
+{
+ "bands": {
+  "0-72h": {
+   "kind": "temperature",
+   "T": 2.1989154714409405
+  },
+  "78-168h": {
+   "kind": "temperature",
+   "T": 2.451652533439192
+  },
+  "174-240h": {
+   "kind": "temperature",
+   "T": 1.4328933903166325
+  }
+ },
+ "fitted_on": [
+  "cyc_03",
+  "heat_03",
+  "cold_03"
+ ],
+ "choice": {
+  "0-72h": {
+   "chosen": "temperature",
+   "loo_brier": {
+    "temperature": 0.02287611493772068,
+    "isotonic": 0.0320712066056417
+   },
+   "val_base_rate": 0.1653597056865692,
+   "T": 2.1989154714409405
+  },
+  "78-168h": {
+   "chosen": "temperature",
+   "loo_brier": {
+    "temperature": 0.03861800419599701,
+    "isotonic": 0.05273667781602059
+   },
+   "val_base_rate": 0.09844449162483215,
+   "T": 2.451652533439192
+  },
+  "174-240h": {
+   "chosen": "temperature",
+   "loo_brier": {
+    "temperature": Infinity,
+    "isotonic": Infinity
+   },
+   "val_base_rate": 0.0,
+   "T": 1.4328933903166325
+  }
+ }
+}

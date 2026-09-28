@@ -33,6 +33,11 @@ export interface Meta {
   n_members: number; bounds: [number, number, number, number];
   fields_member: string; downscaler: string; tracker: string;
   legends: Record<string, Legend>; bbox4d: Box4D[];
+  fields_member_index?: number;
+  layers?: Partial<Record<"mesh_prob" | "strike_cal" | "truth" | "efi" | "scen" | "physviol", boolean>>;
+  scenario?: { bounds: [number, number, number, number]; frame_bounds: [number, number, number, number]; leads_h: number[]; samples: number; vars: string[]; member: number; model: string; physics_overlay: string } | null;
+  ibtracs?: { time: string; lat: number; lon: number; wind_kt?: number | null }[];
+  real_event?: string;
   metrics: {
     tracking?: Record<string, TrackingMetrics>;
     split?: string;
@@ -49,7 +54,11 @@ export interface Alert {
   impact_radius_km: number; region_bbox: [number, number, number, number];
   region_cells_12km: number; in_india: boolean; n_members: number; synthetic: boolean;
   distance_to_pinpoint_km?: number; within_impact_radius?: boolean;
+  explain?: { variable: string; member_values: number[]; thresholds: number[]; members_exceeding: Record<Category, number[]>;
+    n_members: number; drivers: string[]; calibration_band: string; calibration_curve: [number, number, number][] | null; calibration_note: string };
 }
+
+export interface RealEvent { event: string; hazard: Hazard; split: string; case: string | null; scores: any }
 
 export interface DistrictRow {
   district: string; state: string; gid: string; kind: string; category: Category; colour: string;

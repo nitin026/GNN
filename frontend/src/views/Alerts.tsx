@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import MapView from "../components/MapView";
-import { LeadSlider, SEV } from "../components/ui";
-import { alertsAt, currentMode, getAlerts, getDistricts, staticUrl } from "../api";
+import { BarChart, LeadSlider, LineChart, OKABE, SEV } from "../components/ui";
+import { alertsAt, bulletinUrl, currentMode, getAlerts, getDistricts, staticUrl } from "../api";
 import * as L from "../layers";
 import type { Alert, DistrictRow, Meta } from "../types";
 
@@ -67,6 +67,7 @@ export default function Alerts({ meta, lead, setLead, theme }: { meta: Meta; lea
             <div className="note">Ensemble probability {sel.probability} ({sel.probability_type}); per-cell {sel.probability_cell}; {sel.n_members} members.
               Core {sel.pinpoint.lat.toFixed(2)}° N {sel.pinpoint.lon.toFixed(2)}° E ({sel.pinpoint.grid}), 5 km impact radius, valid {sel.valid_time} UTC.
               Region {sel.region_cells_12km} cells at 12 km. {meta.synthetic ? "SYNTHETIC case." : ""}</div>
+            {sel.explain && <Explain a={sel} />}
           </div>}
           <div className="tablewrap">
             <table>
@@ -78,7 +79,9 @@ export default function Alerts({ meta, lead, setLead, theme }: { meta: Meta; lea
             </table>
             {!alerts.length && <p className="note">No alerts{allLeads ? "" : " at this lead"}.</p>}
           </div>
-          <h2>District bulletin</h2>
+          <h2>District bulletin {currentMode() === "api" && <span className="links">
+            <a href={bulletinUrl(meta.case, "en", allLeads ? undefined : lead)} target="_blank" rel="noreferrer">English</a> ·{" "}
+            <a href={bulletinUrl(meta.case, "hi", allLeads ? undefined : lead)} target="_blank" rel="noreferrer" lang="hi">हिन्दी</a> (print → PDF)</span>}</h2>
           {districts === null ? <p className="note">{currentMode() === "api" ? "No district roll-up for this case." : "Offline mode: the district roll-up needs the API (python -m backend.api)."}</p> :
             <div className="tablewrap"><table>
               <thead><tr><th scope="col">district</th><th scope="col">state</th><th scope="col">severity</th><th scope="col">kind</th><th scope="col">P</th><th scope="col">leads</th></tr></thead>
@@ -90,5 +93,34 @@ export default function Alerts({ meta, lead, setLead, theme }: { meta: Meta; lea
         </div>
       </div>
     </section>
+  );
+}
+
+
+
+const CATIDX: Record<string, number> = { low: 0, moderate: 1, severe: 2 };
+
+function Explain({ a }: { a: Alert }) {
+  const x = a.explain!;
+  const lv = ["low", "moderate", "severe"] as const;
+  const order = x.member_values.map((v, i) => [v, i] as const).sort((p, q) => q[0] - p[0]).slice(0, 20);
+  const sev = x.members_exceeding.severe;
+  return (
+    <div className="explaindetail" aria-label="Explain this alert">
+      <b>Explain this alert</b>
+      <div className="note">Driver: {x.drivers.join(", ")}. {x.variable}.</div>
+      <div className="note">
+        Members exceeding: {lv.map((l) => `${l} ${x.members_exceeding[l].length}/${x.n_members}`).join(" · ")}
+        {sev.length ? ` (severe: members ${sev.slice(0, 10).join(", ")}${sev.length > 10 ? "…" : ""})` : ""}
+      </div>
+      <BarChart h={160} ylabel={x.variable.split(",")[0]} groups={order.map(([, i]) => `m${i}`)} ref1={x.thresholds[CATIDX[a.category]]}
+        series={[{ name: "member value, sorted (dashed line = threshold of this level)", color: OKABE[5], values: order.map(([v]) => v) }]} />
+      {x.calibration_curve && (
+        <LineChart h={170} xlabel="forecast probability" ylabel="observed frequency"
+          series={[{ name: "perfect", color: "currentColor", x: [0, 1], y: [0, 1], dash: "4 3" },
+            { name: `calibrated GNN, ${x.calibration_band} (SYNTHETIC TEST)`, color: OKABE[4],
+              x: x.calibration_curve.map((r) => r[0]), y: x.calibration_curve.map((r) => r[1]) }]} />)}
+      <div className="note">{x.calibration_note}</div>
+    </div>
   );
 }

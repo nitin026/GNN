@@ -15,5 +15,19 @@ def case_dirs():
 @pytest.fixture(scope="session")
 def cases():
     c = case_dirs()
-    assert c, "no synthetic cases found - run `make data-synth`"
+    if not c:                      # CI / fresh clone: the NetCDF cases are reproducible, not in git
+        pytest.skip("no synthetic cases found - run `make data-synth`")
     return c
+
+
+def pytest_collection_modifyitems(config, items):
+    """Tests marked `needs_data` (or that open data/ files) skip when the large data are absent."""
+    have = (ROOT / "data/real/clim/era5_clim_g12.nc").exists()
+    skip = pytest.mark.skip(reason="large reproducible data not present (CI): run `make all`")
+    for it in items:
+        if "needs_data" in it.keywords and not have:
+            it.add_marker(skip)
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "needs_data: needs data/real or data/synthetic NetCDF files")

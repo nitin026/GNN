@@ -20,7 +20,7 @@ import pandas as pd
 import xarray as xr
 
 from .anomaly import Climatology
-from .evaluate import CONFIG, run_detection
+from .evaluate import run_detection
 from .track import haversine_km, iou, main_track, track_masks
 from .tracker2 import Tracker2
 

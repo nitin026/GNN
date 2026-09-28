@@ -147,3 +147,29 @@ def test_reports(client):
     assert r.status_code == 200 and "cases" in r.json()
     assert client.get("/reports/..%2F.env").status_code == 404
     assert client.get("/reports/RESULTS.md").status_code == 404
+
+
+def test_health_versions_and_rate_limit():
+    from backend.api.app import create_app
+    c = TestClient(create_app(runner=fake_runner, rate={"default": (3, 60.0), "run": (1, 3600.0)}))
+    h = c.get("/health").json()
+    assert "tracker/full" in h["models"] and "gnn_results.json" in h["data"]["reports"]
+    assert c.get("/cases").status_code == 200
+    assert c.get("/cases").status_code == 200
+    r = c.get("/cases")
+    assert r.status_code == 429 and int(r.headers["Retry-After"]) > 0
+
+
+def test_bulletin_events_alert_detail(client):
+    en = client.get("/bulletin", params={"case": "amphan_replay"})
+    hi = client.get("/bulletin", params={"case": "amphan_replay", "lang": "hi"})
+    assert en.status_code == 200 and "District weather warning bulletin" in en.text and "SYNTHETIC" in en.text
+    assert hi.status_code == 200 and "ज़िला मौसम चेतावनी बुलेटिन" in hi.text and 'lang="hi"' in hi.text
+    assert client.get("/bulletin", params={"case": "amphan_replay", "lang": "fr"}).status_code == 422
+    ev = client.get("/events").json()
+    assert any(e["event"] == "amphan_2020" and e["split"] == "REAL-VAL" for e in ev)
+    assert all(e["scores"] == "locked (REAL-TEST, BRIEF4 Phase 8)" for e in ev if e["split"] == "REAL-TEST")
+    a = client.get("/alerts", params={"case": "cyc_04", "limit": 1}).json()["alerts"][0]
+    d = client.get(f"/alerts/{a['id']}").json()
+    assert d["id"] == a["id"]
+    assert client.get("/alerts/nope-1").status_code == 404

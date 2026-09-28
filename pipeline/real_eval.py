@@ -25,7 +25,7 @@ import xarray as xr
 from .anomaly import Climatology
 from .jsonutil import dumps as strict_dumps
 from .evaluate2 import orog12
-from .gnn_eval import decode, gnn_main_track, infer, load_model
+from .gnn_eval import decode, infer, load_model
 from .graphs import build_graph
 from .te_style import te_blobs, te_cyclones
 from .track import haversine_km
@@ -53,7 +53,6 @@ def ibtracs(path):
 
 
 def landfall_time(ib):
-    d = pd.to_numeric(ib.DIST2LAND, errors="coerce")
     k = int(np.argmax(pd.to_numeric(ib.USA_WIND, errors="coerce").fillna(0).values))
     after = ib.iloc[k:]
     hit = after[pd.to_numeric(after.DIST2LAND, errors="coerce") <= 0]

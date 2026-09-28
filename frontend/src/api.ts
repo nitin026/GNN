@@ -114,3 +114,23 @@ export async function getDistricts(c: string, lead?: number): Promise<DistrictRo
   try { return (await json<{ districts: DistrictRow[] }>(`${API}/alerts/districts?case=${c}${q}`)).districts; }
   catch { return null; }
 }
+
+// ---------------------------------------------------------------- BRIEF4 Phase 6 extras
+/** Extra 12 km layers written by scripts/export_extras.py: mesh_prob, strike_cal, efi, truth, physviol. */
+export const layerUrl = (c: string, layer: string, lead: number) => `${base()}/products/${c}/${layer}/${pad3(lead)}.png`;
+export const scenarioUrl = (c: string, v: string, s: string, lead: number) => `${base()}/products/${c}/scen/${v}/${s}/${pad3(lead)}.png`;
+export const bulletinUrl = (c: string, lang: "en" | "hi", lead?: number) =>
+  `${API}/bulletin?case=${c}&lang=${lang}${lead === undefined ? "" : `&lead=${lead}`}`;
+
+export async function getEvents(): Promise<import("./types").RealEvent[]> {
+  if (mode === "api") return json(`${API}/events`);
+  // offline: real cases from the index; scores from reports/real_results.json
+  const [idx, rr] = await Promise.all([getCases(), getReport("real_results.json").catch(() => null)]);
+  const out: import("./types").RealEvent[] = [];
+  for (const c of idx.filter((x) => !x.synthetic)) {
+    const m = await getMeta(c.case);
+    const ev = m.real_event ?? c.case;
+    out.push({ event: ev, hazard: c.hazard, split: "REAL-VAL", case: c.case, scores: rr?.era5_real_val?.[ev] ?? null });
+  }
+  return out;
+}

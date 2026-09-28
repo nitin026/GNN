@@ -95,13 +95,21 @@ def main():
     ap.add_argument("--api", default="http://127.0.0.1:8000")
     ap.add_argument("--n", type=int, default=40)
     ap.add_argument("--no-run", action="store_true")
+    ap.add_argument("--operational", nargs="*", default=[], help="run.json files of pipeline/run_operational.py")
+    ap.add_argument("--vm-usd-per-hour", type=float, default=0.50,
+                    help="ASSUMED on-demand price of a 12-vCPU / 16 GB cloud VM, used only for the cost estimate")
+    ap.add_argument("--latency-only", action="store_true", help="keep the stored end-to-end and operational numbers")
     a = ap.parse_args()
-    lat = latency(a.api, a.n)
     prev = json.loads((ROOT / "reports/system_perf.json").read_text()) if (ROOT / "reports/system_perf.json").exists() else {}
-    e2e = prev.get("end_to_end") if a.no_run else end_to_end(a.api)
+    lat = latency(a.api, a.n) if a.api != "none" else prev.get("api_latency", [])
+    e2e = prev.get("end_to_end") if (a.no_run or a.latency_only or a.api == "none") else end_to_end(a.api)
+    ops = [json.loads(Path(f).read_text()) for f in a.operational] or prev.get("operational", [])
+    for o in ops:
+        o["cost_usd_per_cycle_assumed_vm"] = round(o["total_seconds"] / 3600 * a.vm_usd_per_hour, 3)
+        o["vm_usd_per_hour_assumed"] = a.vm_usd_per_hour
     demo = json.loads((ROOT / "reports/demo_timing.json").read_text()) if (ROOT / "reports/demo_timing.json").exists() else {}
     res = {"measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "machine": f"{platform.processor()} ({platform.system()}), CPU only, no GPU",
-           "api_latency": lat, "end_to_end": e2e, "demo_cycle": demo}
+           "api_latency": lat, "end_to_end": e2e, "demo_cycle": demo, "operational": ops}
     (ROOT / "reports/system_perf.json").write_text(dumps(res, indent=1))
     write_md(res)
 
@@ -131,6 +139,30 @@ def write_md(res):
             st = "; ".join(f"{s['stage']} {s['seconds']:.0f}s" for s in r["stages"])
             L.append(f"| {k} | {r['members']} x {r['leads']} | {r['total_seconds']:.0f} | {r['peak_rss_mb']} | {st} |")
         L.append("")
+    if res.get("operational"):
+        L += ["## Operational pipeline (pipeline/run_operational.py, BRIEF4 Phase 5)", "",
+              "Full chain: load -> anomaly/EFI + mesh GNN (3 hazards) -> objects + object GNN tracks -> calibration -> "
+              "crop (4-D box + 100 km) -> diffusion downscaling (U-Net mean + residual sample per member, 25 DDIM steps) -> "
+              "5 km alerts -> products.", "",
+              "| input | members x leads | total (s) | peak RAM (MB) | alerts | cost / cycle (assumed VM price) |",
+              "|---|---|---|---|---|---|"]
+        for o in res["operational"]:
+            mx = f"{o.get('members', '?')} x {o.get('leads', '?')}"
+            L.append(f"| {o['input']} | {mx} | {o['total_seconds']:.0f} | {o['peak_rss_mb']} | {o['alerts']} | "
+                     f"${o['cost_usd_per_cycle_assumed_vm']:.3f} at ${o['vm_usd_per_hour_assumed']:.2f}/h (assumption) |")
+        L += ["", "| stage | " + " | ".join(Path(o["input"]).name for o in res["operational"]) + " |",
+              "|---|" + "---|" * len(res["operational"])]
+        names = []
+        for o in res["operational"]:
+            for s_ in o["stages"]:
+                if s_["stage"] not in names:
+                    names.append(s_["stage"])
+        for n in names:
+            L.append(f"| {n} | " + " | ".join(next((f"{s_['seconds']:.1f}" for s_ in o["stages"] if s_["stage"] == n), "-")
+                                              for o in res["operational"]) + " |")
+        L += ["", "**GPU claim.** The PS text says a cycle takes 'seconds on a cloud GPU'. No GPU was available here, so this "
+              "is NOT measured: the numbers above are CPU-only. The notebook notebooks/train_colab.ipynb has a cell that times "
+              "the same command on a Colab T4; until it is run, the honest statement is the CPU time above.", ""]
     L += ["## What did not work", "",
           "- Everything runs on one CPU (no GPU); a Colab T4 timing is BRIEF4 Phase 5.",
           "- Peak RAM of a forecast cycle is several GB because the whole 20-member ensemble is held in "

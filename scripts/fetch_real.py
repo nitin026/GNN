@@ -201,7 +201,7 @@ def rh850():
     d["r850"] = rh.astype("float32")
     d.close()
     d = d.drop_vars([v for v in d.data_vars if v not in ATTRS["units"] and v != "r850"])
-    paths = finish(d, "amphan", "ERA5 (WeatherBench 2)")
+    finish(d, "amphan", "ERA5 (WeatherBench 2)")
     log("ERA5 amphan 850 hPa relative humidity", f"{GCS}/{WB2_ERA5}", "OK", None,
         f"{s} .. {e} (6-hourly)", f"r850 added to amphan files; {time.time() - t0:.0f}s")
 

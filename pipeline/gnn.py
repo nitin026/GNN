@@ -7,6 +7,9 @@ Graph: nodes = candidate objects (member, lead); undirected edges of two types
     h_i   <- LayerNorm(h_i + MLP_u([h_i, a_i^temporal, a_i^cross]))
 Heads: node event logit MLP(h_i); edge link logit MLP([h_i + h_j, |h_i - h_j|, e_ij]).
 Ablations switch edge types off (use_temporal / use_cross); with both off it is a node MLP.
+readout=True (BRIEF4 Phase 3) adds a graph-level consensus readout: the mean of h over all nodes at
+the same lead (all members) is fed into every node update, so each node sees what the whole
+ensemble is doing at that lead.
 """
 import torch
 import torch.nn as nn
@@ -22,22 +25,24 @@ def mlp(i, h, o, n=2):
 
 class GNNTracker(nn.Module):
     def __init__(self, n_node, n_edge, hidden=64, layers=3, use_temporal=True, use_cross=True,
-                 dropout=0.1):
+                 dropout=0.1, readout=False):
         super().__init__()
         self.use = {"temporal": use_temporal, "cross": use_cross}
+        self.readout = readout
         self.enc = mlp(n_node, hidden, hidden)
         self.eenc = mlp(n_edge, hidden // 2, hidden // 2)
         self.msg = nn.ModuleList([nn.ModuleDict({r: mlp(2 * hidden + hidden // 2, hidden, hidden)
                                                  for r in ("temporal", "cross")})
                                   for _ in range(layers)])
-        self.upd = nn.ModuleList([mlp(3 * hidden, hidden, hidden) for _ in range(layers)])
+        self.upd = nn.ModuleList([mlp((4 if readout else 3) * hidden, hidden, hidden) for _ in range(layers)])
         self.norm = nn.ModuleList([nn.LayerNorm(hidden) for _ in range(layers)])
         self.drop = nn.Dropout(dropout)
         self.node_head = mlp(hidden, hidden, 1)
         self.edge_head = mlp(2 * hidden + hidden // 2, hidden, 1)
 
-    def forward(self, x, edges, efeat, etype):
-        """x (N,F); edges (E,2) long; efeat (E,Fe); etype (E,) bool, True = temporal."""
+    def forward(self, x, edges, efeat, etype, lead=None):
+        """x (N,F); edges (E,2) long; efeat (E,Fe); etype (E,) bool, True = temporal;
+        lead (N,) long lead index (needed only with readout=True)."""
         h = self.enc(x)
         e = self.eenc(efeat)
         N = h.shape[0]
@@ -57,6 +62,11 @@ class GNNTracker(nn.Module):
                         0, d, torch.ones(len(d), device=h.device)).clamp(min=1)
                     agg = agg / deg[:, None]
                 aggs.append(agg)
+            if self.readout:
+                nl = int(lead.max()) + 1
+                pooled = torch.zeros(nl, h.shape[1], device=h.device).index_add(0, lead, h)
+                cnt = torch.zeros(nl, device=h.device).index_add(0, lead, torch.ones_like(lead, dtype=h.dtype))
+                aggs.append((pooled / cnt.clamp(min=1)[:, None])[lead])
             h = norm(h + self.drop(upd(torch.cat([h] + aggs, 1))))
         node_logit = self.node_head(h).squeeze(-1)
         hi, hj = h[edges[:, 0]], h[edges[:, 1]]
